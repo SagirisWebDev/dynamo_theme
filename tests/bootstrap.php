@@ -1,0 +1,147 @@
+<?php
+declare(strict_types=1);
+
+define('DYNAMO_VERSION', '1.0.0');
+define('DYNAMO_PATH', dirname(__DIR__) . '/');
+define('DYNAMO_URL', 'http://localhost/');
+define('DAY_IN_SECONDS', 86400);
+
+$GLOBALS['wp_filter']             = [];
+$GLOBALS['wp_transients']         = [];
+$GLOBALS['wp_theme_pages']        = [];
+$GLOBALS['wp_registered_settings'] = [];
+$GLOBALS['wp_enqueued_scripts']   = [];
+
+function add_filter(string $tag, callable $callback, int $priority = 10, int $accepted_args = 1): void {
+    $GLOBALS['wp_filter'][$tag][$priority][] = $callback;
+}
+
+function add_action(string $tag, callable $callback, int $priority = 10, int $accepted_args = 1): void {
+    add_filter($tag, $callback, $priority, $accepted_args);
+}
+
+function apply_filters(string $tag, mixed $value, mixed ...$args): mixed {
+    if (empty($GLOBALS['wp_filter'][$tag])) {
+        return $value;
+    }
+    ksort($GLOBALS['wp_filter'][$tag]);
+    foreach ($GLOBALS['wp_filter'][$tag] as $callbacks) {
+        foreach ($callbacks as $callback) {
+            $value = $callback($value, ...$args);
+        }
+    }
+    return $value;
+}
+
+function get_transient(string $key): mixed {
+    return $GLOBALS['wp_transients'][$key] ?? false;
+}
+
+function set_transient(string $key, mixed $value, int $expiration = 0): bool {
+    $GLOBALS['wp_transients'][$key] = $value;
+    return true;
+}
+
+function delete_transient(string $key): bool {
+    unset($GLOBALS['wp_transients'][$key]);
+    return true;
+}
+
+function __( string $text, string $domain = 'default' ): string {
+    return $text;
+}
+
+function sanitize_hex_color( string $color ): string {
+    return $color;
+}
+
+function wp_enqueue_script(string $handle, string $src = '', array $deps = [], mixed $ver = false, bool $in_footer = false): void {
+    $GLOBALS['wp_enqueued_scripts'][] = $handle;
+    $GLOBALS['wp_enqueued_script_deps'][$handle] = $deps;
+}
+
+function wp_enqueue_style(): void {}
+
+function add_theme_page(string $page_title, string $menu_title, string $capability, string $menu_slug, ?callable $callback = null): void {
+    $GLOBALS['wp_theme_pages'][] = $menu_slug;
+}
+
+function register_setting(string $option_group, string $option_name, array $args = []): void {
+    $GLOBALS['wp_registered_settings'][] = ['group' => $option_group, 'name' => $option_name];
+}
+
+function plugin_dir_url(): string { return DYNAMO_URL; }
+
+function remove_action(string $tag, mixed $callback, int $priority = 10): bool {
+    $GLOBALS['wp_removed_actions'][] = $tag;
+    return true;
+}
+
+function remove_filter(string $tag, mixed $callback, int $priority = 10): bool {
+    $GLOBALS['wp_removed_actions'][] = $tag;
+    return true;
+}
+
+function wp_deregister_script(string $handle): void {
+    $GLOBALS['wp_deregistered_scripts'][] = $handle;
+}
+
+function wp_dequeue_script(string $handle): void {
+    $GLOBALS['wp_dequeued_scripts'][] = $handle;
+}
+
+function get_option(string $option, mixed $default = false): mixed {
+    return $GLOBALS['wp_options'][$option] ?? $default;
+}
+
+function update_option(string $option, mixed $value): bool {
+    $GLOBALS['wp_options'][$option] = $value;
+    return true;
+}
+
+class WP_Customize_Color_Control {
+    public string $id;
+    public array  $args;
+
+    public function __construct(object $manager, string $id, array $args) {
+        $this->id   = $id;
+        $this->args = $args;
+    }
+}
+
+class WP_Customize_Control {
+    public string $id;
+    public array  $args;
+
+    public function __construct(object $manager, string $id, array $args) {
+        $this->id   = $id;
+        $this->args = $args;
+    }
+}
+
+class WP_Theme_JSON_Data {
+    private array $data;
+
+    public function __construct(array $data = []) {
+        $this->data = $data;
+    }
+
+    public function get_data(): array {
+        return $this->data;
+    }
+
+    public function update_with(array $data): void {
+        $this->data = $data;
+    }
+}
+
+require_once DYNAMO_PATH . 'includes/class-dynamo-token-registry.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-options.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-css-generator.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-css-cache.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-customizer.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-theme-json-sync.php';
+
+function dynamo_bust_css_cache(): void {
+    (new Dynamo_CSS_Cache())->bust();
+}

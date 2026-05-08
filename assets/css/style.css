@@ -1,0 +1,280 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+
+body {
+    margin: 0;
+    background-color: var(--dynamo-colors-background);
+    color: var(--dynamo-colors-text);
+    font-family: var(--dynamo-typography-body-font-family);
+    font-size: var(--dynamo-typography-body-font-size);
+    font-weight: var(--dynamo-typography-body-font-weight);
+    line-height: var(--dynamo-typography-body-line-height);
+}
+
+a {
+    color: var(--dynamo-colors-link);
+}
+
+a:hover {
+    color: var(--dynamo-colors-primary);
+}
+
+/* ── Headings ───────────────────────────────────────────────────────────── */
+
+h1 {
+    font-family: var(--dynamo-typography-h1-font-family);
+    font-size: var(--dynamo-typography-h1-font-size);
+    font-weight: var(--dynamo-typography-h1-font-weight);
+    line-height: var(--dynamo-typography-h1-line-height);
+}
+
+h2 {
+    font-family: var(--dynamo-typography-h2-font-family);
+    font-size: var(--dynamo-typography-h2-font-size);
+    font-weight: var(--dynamo-typography-h2-font-weight);
+    line-height: var(--dynamo-typography-h2-line-height);
+}
+
+h3 {
+    font-family: var(--dynamo-typography-h3-font-family);
+    font-size: var(--dynamo-typography-h3-font-size);
+    font-weight: var(--dynamo-typography-h3-font-weight);
+    line-height: var(--dynamo-typography-h3-line-height);
+}
+
+h4 {
+    font-family: var(--dynamo-typography-h4-font-family);
+    font-size: var(--dynamo-typography-h4-font-size);
+    font-weight: var(--dynamo-typography-h4-font-weight);
+    line-height: var(--dynamo-typography-h4-line-height);
+}
+
+h5 {
+    font-family: var(--dynamo-typography-h5-font-family);
+    font-size: var(--dynamo-typography-h5-font-size);
+    font-weight: var(--dynamo-typography-h5-font-weight);
+    line-height: var(--dynamo-typography-h5-line-height);
+}
+
+h6 {
+    font-family: var(--dynamo-typography-h6-font-family);
+    font-size: var(--dynamo-typography-h6-font-size);
+    font-weight: var(--dynamo-typography-h6-font-weight);
+    line-height: var(--dynamo-typography-h6-line-height);
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────────── */
+
+.dynamo-container {
+    max-width: var(--dynamo-layout-container-max-width);
+    margin-inline: auto;
+    padding-inline: var(--dynamo-spacing-content-padding-x);
+}
+
+.dynamo-content-wrap {
+    max-width: var(--dynamo-layout-content-width);
+    margin-inline: auto;
+}
+
+/* ── Site header ────────────────────────────────────────────────────────── */
+
+.site-header {
+    background-color: var(--dynamo-colors-primary);
+    color: var(--dynamo-colors-background);
+    padding-top: var(--dynamo-spacing-header-padding-top);
+    padding-bottom: var(--dynamo-spacing-header-padding-bottom);
+    border-bottom: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+    box-shadow: var(--dynamo-shadows-sm);
+}
+
+.site-header a {
+    color: var(--dynamo-colors-background);
+    text-decoration: none;
+}
+
+.site-title {
+    margin: 0;
+    font-family: var(--dynamo-typography-h1-font-family);
+    font-size: var(--dynamo-typography-h2-font-size);
+    font-weight: var(--dynamo-typography-h1-font-weight);
+    line-height: var(--dynamo-typography-h1-line-height);
+}
+
+.site-description {
+    margin: 0;
+    opacity: 0.85;
+}
+
+/* ── Site footer ────────────────────────────────────────────────────────── */
+
+.site-footer {
+    background-color: var(--dynamo-colors-section-alt);
+    color: var(--dynamo-colors-secondary);
+    padding-top: var(--dynamo-spacing-footer-padding-top);
+    padding-bottom: var(--dynamo-spacing-footer-padding-bottom);
+    border-top: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+}
+
+/* ── Main content area ──────────────────────────────────────────────────── */
+
+.site-main {
+    padding-top: var(--dynamo-spacing-content-padding-top);
+    padding-bottom: var(--dynamo-spacing-content-padding-bottom);
+}
+
+/* ── Post / page entries ────────────────────────────────────────────────── */
+
+.entry-header {
+    margin-bottom: var(--dynamo-spacing-content-padding-top);
+}
+
+.entry-title {
+    margin-top: 0;
+}
+
+.entry-title a {
+    color: var(--dynamo-colors-text);
+    text-decoration: none;
+}
+
+.entry-title a:hover {
+    color: var(--dynamo-colors-primary);
+}
+
+.entry-meta {
+    color: var(--dynamo-colors-secondary);
+    font-size: var(--dynamo-typography-body-font-size);
+}
+
+.entry-footer {
+    margin-top: var(--dynamo-spacing-content-padding-top);
+    padding-top: var(--dynamo-spacing-content-padding-top);
+    border-top: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+    color: var(--dynamo-colors-secondary);
+}
+
+/* ── Post cards (archive / index) ───────────────────────────────────────── */
+
+.post-card {
+    padding-bottom: var(--dynamo-spacing-content-padding-bottom);
+    margin-bottom: var(--dynamo-spacing-content-padding-bottom);
+    border-bottom: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+}
+
+.post-card:last-child {
+    border-bottom: none;
+}
+
+/* ── Navigation ─────────────────────────────────────────────────────────── */
+
+.posts-navigation,
+.post-navigation {
+    margin-top: var(--dynamo-spacing-content-padding-top);
+    border-top: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+    padding-top: var(--dynamo-spacing-content-padding-top);
+}
+
+/* ── Archive header ─────────────────────────────────────────────────────── */
+
+.archive-header,
+.page-header {
+    background-color: var(--dynamo-colors-section-alt);
+    padding-top: var(--dynamo-spacing-content-padding-top);
+    padding-bottom: var(--dynamo-spacing-content-padding-bottom);
+    margin-bottom: var(--dynamo-spacing-content-padding-bottom);
+    border-bottom: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+}
+
+.archive-title,
+.page-title {
+    color: var(--dynamo-colors-text);
+    margin: 0;
+}
+
+/* ── Search form ────────────────────────────────────────────────────────── */
+
+.search-form input[type="search"] {
+    border: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+    border-radius: var(--dynamo-borders-radius);
+    padding: 0.5rem 1rem;
+    font-family: var(--dynamo-typography-body-font-family);
+    font-size: var(--dynamo-typography-body-font-size);
+    color: var(--dynamo-colors-text);
+    background-color: var(--dynamo-colors-background);
+}
+
+.search-form button,
+.search-form input[type="submit"] {
+    background-color: var(--dynamo-colors-primary);
+    color: var(--dynamo-colors-background);
+    border: none;
+    border-radius: var(--dynamo-borders-radius);
+    padding: 0.5rem 1rem;
+    font-family: var(--dynamo-typography-body-font-family);
+    font-size: var(--dynamo-typography-body-font-size);
+    cursor: pointer;
+}
+
+/* ── 404 ────────────────────────────────────────────────────────────────── */
+
+.error-404 .page-header {
+    border-radius: var(--dynamo-borders-radius);
+    box-shadow: var(--dynamo-shadows-md);
+}
+
+/* ── Accessibility: skip link ───────────────────────────────────────────── */
+
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    background-color: var(--dynamo-colors-primary);
+    color: var(--dynamo-colors-background);
+    padding: 0.5rem 1rem;
+    border-radius: var(--dynamo-borders-radius);
+}
+
+.skip-link:focus {
+    left: 0;
+    top: 0;
+}
+
+/* ── Layout modes ───────────────────────────────────────────────────────── */
+
+.dynamo-layout-boxed .dynamo-container {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--dynamo-spacing-lg);
+    padding-right: var(--dynamo-spacing-lg);
+}
+
+.dynamo-content-wrap.dynamo-has-sidebar {
+    display: flex;
+    gap: var(--dynamo-spacing-xl, 2rem);
+    align-items: flex-start;
+}
+
+.dynamo-content-wrap.dynamo-has-sidebar .dynamo-primary {
+    flex: 1;
+    min-width: 0;
+}
+
+.dynamo-content-wrap.dynamo-has-sidebar .dynamo-sidebar {
+    flex: 0 0 280px;
+    min-width: 0;
+}
+
+@media (max-width: 768px) {
+    .dynamo-content-wrap.dynamo-has-sidebar {
+        flex-direction: column;
+    }
+
+    .dynamo-content-wrap.dynamo-has-sidebar .dynamo-sidebar {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}
