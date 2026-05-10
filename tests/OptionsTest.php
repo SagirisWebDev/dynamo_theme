@@ -175,8 +175,27 @@ class OptionsTest extends TestCase {
     public function test_jquery_migrate_dequeued_when_setting_enabled(): void {
         $GLOBALS['wp_options']['dynamo_options'] = ['performance' => ['remove_jquery_migrate' => true]];
         $GLOBALS['wp_dequeued_scripts'] = [];
-        $this->makeOptions()->apply_performance_settings();
+        $this->makeOptions()->apply_late_performance_settings();
         $this->assertContains('jquery-migrate', $GLOBALS['wp_dequeued_scripts']);
+    }
+
+    public function test_jquery_migrate_not_dequeued_when_setting_disabled(): void {
+        $GLOBALS['wp_options']['dynamo_options'] = ['performance' => ['remove_jquery_migrate' => false]];
+        $GLOBALS['wp_dequeued_scripts'] = [];
+        $this->makeOptions()->apply_late_performance_settings();
+        $this->assertNotContains('jquery-migrate', $GLOBALS['wp_dequeued_scripts']);
+    }
+
+    public function test_init_registers_late_performance_hook_on_wp_enqueue_scripts(): void {
+        $this->makeOptions()->init();
+        $this->assertArrayHasKey('wp_enqueue_scripts', $GLOBALS['wp_filter']);
+    }
+
+    public function test_apply_performance_settings_does_not_dequeue_jquery_migrate(): void {
+        $GLOBALS['wp_options']['dynamo_options'] = ['performance' => ['remove_jquery_migrate' => true]];
+        $GLOBALS['wp_dequeued_scripts'] = [];
+        $this->makeOptions()->apply_performance_settings();
+        $this->assertNotContains('jquery-migrate', $GLOBALS['wp_dequeued_scripts']);
     }
 
     // --- Issue #16: vanilla JS enqueue ---
@@ -212,5 +231,107 @@ class OptionsTest extends TestCase {
     public function test_enqueue_scripts_skips_all_handles_on_other_pages(): void {
         $this->makeOptions()->enqueue_scripts('edit.php');
         $this->assertEmpty($GLOBALS['wp_enqueued_scripts']);
+    }
+
+    // --- Frontend feature wiring ---
+
+    public function test_init_registers_wp_footer_for_scroll_to_top(): void {
+        $this->makeOptions()->init();
+        $this->assertArrayHasKey('wp_footer', $GLOBALS['wp_filter']);
+    }
+
+    public function test_enqueue_frontend_scripts_loads_scroll_script_when_enabled(): void {
+        $GLOBALS['wp_options']['dynamo_options'] = ['features' => ['scroll_to_top' => true]];
+        $this->makeOptions()->enqueue_frontend_scripts();
+        $this->assertContains('dynamo-scroll-to-top', $GLOBALS['wp_enqueued_scripts']);
+    }
+
+    public function test_enqueue_frontend_scripts_skips_scroll_script_when_disabled(): void {
+        $GLOBALS['wp_options']['dynamo_options'] = ['features' => ['scroll_to_top' => false]];
+        $this->makeOptions()->enqueue_frontend_scripts();
+        $this->assertNotContains('dynamo-scroll-to-top', $GLOBALS['wp_enqueued_scripts']);
+    }
+
+    public function test_render_scroll_to_top_outputs_button_when_enabled(): void {
+        $GLOBALS['wp_options']['dynamo_options'] = ['features' => ['scroll_to_top' => true]];
+        ob_start();
+        $this->makeOptions()->render_scroll_to_top();
+        $output = ob_get_clean();
+        $this->assertStringContainsString('class="dynamo-scroll-top"', $output);
+        $this->assertStringContainsString('aria-label="Scroll to top"', $output);
+    }
+
+    public function test_render_scroll_to_top_outputs_nothing_when_disabled(): void {
+        $GLOBALS['wp_options']['dynamo_options'] = ['features' => ['scroll_to_top' => false]];
+        ob_start();
+        $this->makeOptions()->render_scroll_to_top();
+        $this->assertSame('', ob_get_clean());
+    }
+
+    // --- Google Fonts stripper ---
+
+    public function test_strip_google_font_link_tags_removes_googleapis_stylesheet(): void {
+        $input  = '<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans&amp;display=swap" media="all">';
+        $output = $this->makeOptions()->strip_google_font_link_tags($input);
+        $this->assertSame('', $output);
+    }
+
+    public function test_strip_google_font_link_tags_removes_googleapis_preload(): void {
+        $input  = '<link rel="preload" as="style" href="//fonts.googleapis.com/css?family=Open+Sans&amp;display=swap">';
+        $output = $this->makeOptions()->strip_google_font_link_tags($input);
+        $this->assertSame('', $output);
+    }
+
+    public function test_strip_google_font_link_tags_removes_gstatic_link(): void {
+        $input  = '<link rel="preconnect" href="https://fonts.gstatic.com">';
+        $output = $this->makeOptions()->strip_google_font_link_tags($input);
+        $this->assertSame('', $output);
+    }
+
+    public function test_strip_google_font_link_tags_preserves_unrelated_links(): void {
+        $html = '<link rel="stylesheet" href="https://example.com/site.css">'
+              . '<link rel="icon" href="/favicon.ico">';
+        $this->assertSame($html, $this->makeOptions()->strip_google_font_link_tags($html));
+    }
+
+    public function test_strip_google_font_link_tags_does_not_affect_inline_styles(): void {
+        $html = '<style id="dynamo-dynamic-css">body{color:red}</style>'
+              . '<link rel="stylesheet" href="//fonts.googleapis.com/css?family=X">';
+        $expected = '<style id="dynamo-dynamic-css">body{color:red}</style>';
+        $this->assertSame($expected, $this->makeOptions()->strip_google_font_link_tags($html));
+    }
+
+    public function test_strip_google_font_link_tags_strips_multiple_in_one_document(): void {
+        $html = '<link rel="preload" as="style" href="//fonts.googleapis.com/css?family=A">'
+              . '<meta charset="utf-8">'
+              . '<link rel="stylesheet" href="//fonts.googleapis.com/css?family=B" media="all">'
+              . '<link rel="stylesheet" href="/local.css">';
+        $expected = '<meta charset="utf-8"><link rel="stylesheet" href="/local.css">';
+        $this->assertSame($expected, $this->makeOptions()->strip_google_font_link_tags($html));
+    }
+
+    public function test_flush_head_buffer_strips_buffered_google_font_tags(): void {
+        $opts = $this->makeOptions();
+        ob_start(); // outer buffer captures what flush echoes
+        $opts->start_head_buffer();
+        echo '<link rel="preload" as="style" href="//fonts.googleapis.com/css?family=Open+Sans">';
+        echo '<link rel="stylesheet" href="https://example.com/site.css">';
+        $opts->flush_head_buffer();
+        $rendered = ob_get_clean();
+
+        $this->assertStringNotContainsString('googleapis.com', $rendered);
+        $this->assertStringContainsString('example.com/site.css', $rendered);
+    }
+
+    public function test_apply_performance_settings_registers_head_buffer_when_disable_google_fonts_on(): void {
+        $GLOBALS['wp_options']['dynamo_options'] = ['performance' => ['disable_google_fonts' => true]];
+        $this->makeOptions()->apply_performance_settings();
+        $this->assertArrayHasKey('wp_head', $GLOBALS['wp_filter']);
+    }
+
+    public function test_apply_performance_settings_does_not_register_head_buffer_when_disable_google_fonts_off(): void {
+        $GLOBALS['wp_options']['dynamo_options'] = ['performance' => ['disable_google_fonts' => false]];
+        $this->makeOptions()->apply_performance_settings();
+        $this->assertArrayNotHasKey('wp_head', $GLOBALS['wp_filter']);
     }
 }

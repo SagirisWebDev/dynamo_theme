@@ -4,7 +4,8 @@ declare(strict_types=1);
 class Dynamo_CSS_Cache {
 
     private function key(): string {
-        return 'dynamo_css_' . DYNAMO_VERSION;
+        $mtime = @filemtime(DYNAMO_PATH . 'assets/css/style.css') ?: 0;
+        return 'dynamo_css_' . DYNAMO_VERSION . '_' . $mtime;
     }
 
     public function get(): ?string {

@@ -9,7 +9,7 @@
 <?php wp_body_open(); ?>
 <a class="skip-link screen-reader-text" href="#main"><?php esc_html_e( 'Skip to content', 'dynamo' ); ?></a>
 
-<header id="masthead" class="site-header">
+<header id="masthead" class="site-header<?php echo Dynamo_Options::is_feature_enabled( 'sticky_header' ) ? ' dynamo-sticky-header' : ''; ?>">
     <div class="dynamo-container">
         <?php if ( is_front_page() && is_home() ) : ?>
             <h1 class="site-title"><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php bloginfo( 'name' ); ?></a></h1>

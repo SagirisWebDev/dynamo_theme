@@ -99,6 +99,30 @@ function update_option(string $option, mixed $value): bool {
     return true;
 }
 
+function is_front_page(): bool {
+    return (bool) ($GLOBALS['wp_is_front_page'] ?? false);
+}
+
+function home_url(string $path = ''): string {
+    return 'http://localhost/' . ltrim($path, '/');
+}
+
+function esc_url(string $url): string {
+    return $url;
+}
+
+function esc_html(string $text): string {
+    return $text;
+}
+
+function esc_attr(string $text): string {
+    return $text;
+}
+
+function esc_attr__(string $text, string $domain = 'default'): string {
+    return $text;
+}
+
 class WP_Customize_Color_Control {
     public string $id;
     public array  $args;
@@ -137,6 +161,7 @@ class WP_Theme_JSON_Data {
 
 require_once DYNAMO_PATH . 'includes/class-dynamo-token-registry.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-options.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-breadcrumbs.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-css-generator.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-css-cache.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-customizer.php';

@@ -41,6 +41,7 @@ $dynamo_has_sidebar = in_array( $dynamo_layout, [ 'sidebar-left', 'sidebar-right
         <?php endif; ?>
 
         <div class="dynamo-primary">
+            <?php Dynamo_Breadcrumbs::render(); ?>
             <?php if ( have_posts() ) : ?>
 
                 <?php while ( have_posts() ) : the_post(); ?>

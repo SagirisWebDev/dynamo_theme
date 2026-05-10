@@ -27,9 +27,26 @@ class CSSCacheTest extends TestCase {
         $this->assertNull($cache->get());
     }
 
-    public function test_cache_key_includes_dynamo_version(): void {
+    public function test_cache_key_includes_dynamo_version_and_style_mtime(): void {
         $cache = new Dynamo_CSS_Cache();
         $cache->set('css');
-        $this->assertArrayHasKey('dynamo_css_' . DYNAMO_VERSION, $GLOBALS['wp_transients']);
+        $mtime = (int) @filemtime(DYNAMO_PATH . 'assets/css/style.css');
+        $this->assertArrayHasKey('dynamo_css_' . DYNAMO_VERSION . '_' . $mtime, $GLOBALS['wp_transients']);
+    }
+
+    public function test_cache_key_changes_when_style_css_changes(): void {
+        $cache = new Dynamo_CSS_Cache();
+        $cache->set('original');
+
+        // Simulate a style.css edit by touching the file forward in time.
+        $path     = DYNAMO_PATH . 'assets/css/style.css';
+        $original = (int) @filemtime($path);
+        touch($path, $original + 60);
+
+        try {
+            $this->assertNull($cache->get(), 'Stale entry should not be returned after style.css mtime changes');
+        } finally {
+            touch($path, $original);
+        }
     }
 }

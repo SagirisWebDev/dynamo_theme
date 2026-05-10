@@ -12,6 +12,7 @@ require_once DYNAMO_PATH . '/includes/class-dynamo-css-output.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-customizer.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-theme-json-sync.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-options.php';
+require_once DYNAMO_PATH . '/includes/class-dynamo-breadcrumbs.php';
 
 add_action('after_setup_theme', function(): void {
     $registry     = new Dynamo_Token_Registry();
@@ -25,6 +26,12 @@ add_action('after_setup_theme', function(): void {
     $customizer->init();
     $theme_json->init();
     $options->init();
+});
+
+add_action('after_setup_theme', function(): void {
+    register_nav_menus([
+        'primary' => __('Primary Menu', 'dynamo'),
+    ]);
 });
 
 add_action('widgets_init', function(): void {

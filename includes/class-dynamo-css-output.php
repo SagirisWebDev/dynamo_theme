@@ -16,13 +16,16 @@ class Dynamo_CSS_Output {
     }
 
     public function print_styles(): void {
-        $css = $this->cache->get();
+        $debug = defined('WP_DEBUG') && WP_DEBUG;
+        $css   = $debug ? null : $this->cache->get();
 
         if (null === $css) {
             $css  = $this->generator->generate() ?: '';
             $file_contents = file_get_contents(get_template_directory() . '/assets/css/style.css') ?: '';
             $css .= $file_contents;
-            $this->cache->set($css);
+            if (!$debug) {
+                $this->cache->set($css);
+            }
         }
 
         echo '<style id="dynamo-dynamic-css">' . $css . "</style>\n";

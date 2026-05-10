@@ -278,3 +278,68 @@ h6 {
         width: 100%;
     }
 }
+
+/* ── Sticky header feature ──────────────────────────────────────────────── */
+
+.dynamo-sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* ── Scroll-to-top feature ──────────────────────────────────────────────── */
+
+.dynamo-scroll-top {
+    position: fixed;
+    right: var(--dynamo-spacing-content-padding-x, 1.5rem);
+    bottom: var(--dynamo-spacing-content-padding-x, 1.5rem);
+    width: 2.75rem;
+    height: 2.75rem;
+    border: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+    border-radius: 999px;
+    background-color: var(--dynamo-colors-primary);
+    color: var(--dynamo-colors-background);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: var(--dynamo-shadows-sm);
+    opacity: 0;
+    transform: translateY(0.5rem);
+    transition: opacity 150ms ease-out, transform 150ms ease-out;
+    pointer-events: none;
+    z-index: 99;
+}
+
+.dynamo-scroll-top.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.dynamo-scroll-top:focus-visible {
+    outline: 2px solid var(--dynamo-colors-link);
+    outline-offset: 2px;
+}
+
+/* ── Breadcrumbs feature ────────────────────────────────────────────────── */
+
+.dynamo-breadcrumbs {
+    margin-bottom: var(--dynamo-spacing-content-padding-top, 1rem);
+    font-size: 0.875rem;
+    color: var(--dynamo-colors-secondary);
+}
+
+.dynamo-breadcrumbs ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+}
+
+.dynamo-breadcrumbs li + li::before {
+    content: '/';
+    margin-right: 0.5rem;
+    color: var(--dynamo-colors-secondary);
+}
