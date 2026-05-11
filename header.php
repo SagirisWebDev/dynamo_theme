@@ -24,9 +24,11 @@
         <?php endif; ?>
         <?php
         wp_nav_menu( [
-            'theme_location' => 'primary',
-            'menu_id'        => 'primary-menu',
-            'fallback_cb'    => false,
+            'theme_location'  => 'primary',
+            'menu_id'         => 'primary-menu',
+            'container'       => 'div',
+            'container_class' => 'menu-primary-container',
+            'fallback_cb'     => false,
         ] );
         ?>
     </div>

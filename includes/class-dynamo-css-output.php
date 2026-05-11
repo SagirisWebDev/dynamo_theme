@@ -21,8 +21,8 @@ class Dynamo_CSS_Output {
 
         if (null === $css) {
             $css  = $this->generator->generate() ?: '';
-            $file_contents = file_get_contents(get_template_directory() . '/assets/css/style.css') ?: '';
-            $css .= $file_contents;
+            // $file_contents = file_get_contents(get_template_directory() . '/assets/css/style.css') ?: '';
+            // $css .= $file_contents;
             if (!$debug) {
                 $this->cache->set($css);
             }
