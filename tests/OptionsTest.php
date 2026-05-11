@@ -5,8 +5,6 @@ use PHPUnit\Framework\TestCase;
 
 class OptionsTest extends TestCase {
 
-    private const VANILLA_JS_PENDING = 'Pending vanilla-JS migration of Dynamo_Options::enqueue_scripts() — currently still uses the React asset bundle.';
-
     protected function setUp(): void {
         $GLOBALS['wp_filter']              = [];
         $GLOBALS['wp_transients']          = [];
@@ -45,12 +43,6 @@ class OptionsTest extends TestCase {
         $this->makeOptions()->register_setting_group();
         $names = array_column($GLOBALS['wp_registered_settings'], 'name');
         $this->assertContains('dynamo_options', $names);
-    }
-
-    public function test_enqueue_scripts_enqueues_on_correct_hook(): void {
-        $this->markTestSkipped(self::VANILLA_JS_PENDING);
-        $this->makeOptions()->enqueue_scripts('appearance_page_dynamo-options');
-        $this->assertContains('dynamo-admin', $GLOBALS['wp_enqueued_scripts']);
     }
 
     public function test_enqueue_scripts_does_not_enqueue_on_other_pages(): void {
@@ -199,47 +191,6 @@ class OptionsTest extends TestCase {
         $GLOBALS['wp_dequeued_scripts'] = [];
         $this->makeOptions()->apply_performance_settings();
         $this->assertNotContains('jquery-migrate', $GLOBALS['wp_dequeued_scripts']);
-    }
-
-    // --- Issue #16: vanilla JS enqueue ---
-    //
-    // These tests describe the planned vanilla-JS successor to the current
-    // React-based Dynamo_Options::enqueue_scripts(). The implementation has
-    // not yet been migrated, so the tests are skipped to keep the suite green
-    // while still documenting the target behaviour. Unskip these as part of
-    // the vanilla-JS migration work.
-
-    public function test_enqueue_scripts_registers_admin_hooks_handle(): void {
-        $this->markTestSkipped(self::VANILLA_JS_PENDING);
-        $this->makeOptions()->enqueue_scripts('appearance_page_dynamo-options');
-        $this->assertContains('dynamo-admin-hooks', $GLOBALS['wp_enqueued_scripts']);
-    }
-
-    public function test_enqueue_scripts_registers_admin_tab_builder_handle(): void {
-        $this->markTestSkipped(self::VANILLA_JS_PENDING);
-        $this->makeOptions()->enqueue_scripts('appearance_page_dynamo-options');
-        $this->assertContains('dynamo-admin-tab-builder', $GLOBALS['wp_enqueued_scripts']);
-    }
-
-    public function test_enqueue_scripts_registers_admin_state_handle(): void {
-        $this->markTestSkipped(self::VANILLA_JS_PENDING);
-        $this->makeOptions()->enqueue_scripts('appearance_page_dynamo-options');
-        $this->assertContains('dynamo-admin-state', $GLOBALS['wp_enqueued_scripts']);
-    }
-
-    public function test_enqueue_scripts_registers_admin_ui_handle(): void {
-        $this->markTestSkipped(self::VANILLA_JS_PENDING);
-        $this->makeOptions()->enqueue_scripts('appearance_page_dynamo-options');
-        $this->assertContains('dynamo-admin-ui', $GLOBALS['wp_enqueued_scripts']);
-    }
-
-    public function test_enqueue_scripts_does_not_use_react_dependencies(): void {
-        $this->markTestSkipped(self::VANILLA_JS_PENDING);
-        $this->makeOptions()->enqueue_scripts('appearance_page_dynamo-options');
-        $all_deps = array_merge(...array_values($GLOBALS['wp_enqueued_script_deps']));
-        $this->assertNotContains('wp-element', $all_deps);
-        $this->assertNotContains('wp-components', $all_deps);
-        $this->assertNotContains('wp-i18n', $all_deps);
     }
 
     public function test_enqueue_scripts_skips_all_handles_on_other_pages(): void {
