@@ -12,26 +12,62 @@ class Dynamo_CSS_Generator {
     }
 
     public function generate(): string {
-        $modules = apply_filters('dynamo_css_modules', ['colors', 'typography', 'spacing', 'layout', 'borders', 'shadows']);
+        $modules = apply_filters(
+            'dynamo_css_modules',
+            ['colors', 'typography', 'spacing', 'layout', 'borders', 'shadows', 'woocommerce']
+        );
 
         if (empty($modules)) {
             return '';
         }
 
-        $parts = [];
+        $parts            = [];
+        $woocommerce_seen = false;
         foreach ($modules as $module) {
             $declarations = $this->module_declarations($module);
             $declarations = apply_filters("dynamo_css_{$module}", $declarations, $this->registry);
             if ('' !== $declarations) {
                 $parts[] = $declarations;
+                if ($module === 'woocommerce') {
+                    $woocommerce_seen = true;
+                }
             }
         }
 
-        if (empty($parts)) {
+        $root  = empty($parts) ? '' : ":root {\n" . implode("\n", $parts) . "\n}";
+        $rules = $woocommerce_seen ? $this->generate_woocommerce_rules() : '';
+
+        if ($root === '' && $rules === '') {
             return '';
         }
 
-        return ":root {\n" . implode("\n", $parts) . "\n}";
+        return trim($root . ($rules !== '' ? "\n\n" . $rules : ''));
+    }
+
+    public function generate_woocommerce_rules(): string {
+        return <<<CSS
+.woocommerce span.onsale {
+  background-color: var(--dynamo-woocommerce-sale-badge-bg);
+  color: var(--dynamo-woocommerce-sale-badge-color);
+}
+.woocommerce .star-rating,
+.woocommerce .star-rating::before,
+.woocommerce .star-rating span::before {
+  color: var(--dynamo-woocommerce-star-color);
+}
+.woocommerce a.button.add_to_cart_button,
+.woocommerce button.single_add_to_cart_button,
+.woocommerce-page button.single_add_to_cart_button {
+  background-color: var(--dynamo-colors-primary);
+  color: var(--dynamo-colors-background);
+}
+.woocommerce ul.products li.product {
+  background-color: var(--dynamo-colors-background);
+  border: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+  border-radius: var(--dynamo-borders-radius);
+  box-shadow: var(--dynamo-shadows-md);
+}
+CSS;
     }
 
     // Last-resort fallback when a typography token references a slug

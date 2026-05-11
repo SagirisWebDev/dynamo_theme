@@ -66,6 +66,10 @@ class Dynamo_Token_Registry {
         'shadows-sm' => '0 1px 2px 0 rgb(0 0 0 / 0.05)',
         'shadows-md' => '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
         'shadows-lg' => '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+
+        'woocommerce-sale-badge-bg'    => '#dc2626',
+        'woocommerce-sale-badge-color' => '#ffffff',
+        'woocommerce-star-color'       => '#f59e0b',
     ];
 
     public function get(string $key): ?string {

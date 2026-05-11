@@ -225,6 +225,7 @@ require_once DYNAMO_PATH . 'includes/class-dynamo-customizer.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-theme-json-sync.php';
 require_once DYNAMO_PATH . 'includes/woocommerce/class-dynamo-woocommerce.php';
 require_once __DIR__ . '/MakesCustomizer.php';
+require_once __DIR__ . '/FakeCustomizeManager.php';
 
 function dynamo_bust_css_cache(): void {
     (new Dynamo_CSS_Cache())->bust();
