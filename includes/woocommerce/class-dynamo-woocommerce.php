@@ -20,6 +20,14 @@ class Dynamo_WooCommerce {
         'meta'        => ['callback' => 'woocommerce_template_single_meta',        'priority' => 40],
     ];
 
+    private const PRODUCT_CARD_REMOVABLE = [
+        'image'       => ['tag' => 'woocommerce_before_shop_loop_item_title', 'callback' => 'woocommerce_template_loop_product_thumbnail', 'priority' => 10],
+        'title'       => ['tag' => 'woocommerce_shop_loop_item_title',        'callback' => 'woocommerce_template_loop_product_title',     'priority' => 10],
+        'rating'      => ['tag' => 'woocommerce_after_shop_loop_item_title',  'callback' => 'woocommerce_template_loop_rating',            'priority' => 5],
+        'price'       => ['tag' => 'woocommerce_after_shop_loop_item_title',  'callback' => 'woocommerce_template_loop_price',             'priority' => 10],
+        'add-to-cart' => ['tag' => 'woocommerce_after_shop_loop_item',        'callback' => 'woocommerce_template_loop_add_to_cart',       'priority' => 10],
+    ];
+
     public function init(): void {
         add_action('after_setup_theme', [$this, 'register_theme_support']);
         add_action('after_setup_theme', [$this, 'replace_content_wrappers'], 11);
@@ -28,6 +36,7 @@ class Dynamo_WooCommerce {
         add_action('dynamo_header_cart', [$this, 'render_header_cart_icon']);
         add_action('template_redirect', [$this, 'apply_single_product_visibility']);
         add_action('template_redirect', [$this, 'apply_cart_visibility']);
+        add_action('template_redirect', [$this, 'apply_product_card_visibility']);
         add_action('woocommerce_before_quantity_input_field', [$this, 'render_quantity_minus_button']);
         add_action('woocommerce_after_quantity_input_field', [$this, 'render_quantity_plus_button']);
         add_filter('gettext', [$this, 'filter_cart_button_text'], 10, 3);
@@ -45,10 +54,72 @@ class Dynamo_WooCommerce {
 
         $this->register_colours_section($wp_customize);
         $this->register_shop_layout_section($wp_customize);
+        $this->register_product_cards_section($wp_customize);
         $this->register_header_cart_section($wp_customize);
         $this->register_single_product_section($wp_customize);
         $this->register_quantity_buttons_section($wp_customize);
         $this->register_cart_checkout_section($wp_customize);
+    }
+
+    private function register_product_cards_section(object $wp_customize): void {
+        $wp_customize->add_section('dynamo_woocommerce_product_cards', [
+            'title' => __('Product Cards', 'dynamo'),
+            'panel' => 'dynamo_woocommerce',
+        ]);
+
+        $registry = new Dynamo_Token_Registry();
+
+        $labels = [
+            'image'             => __('Show product image', 'dynamo'),
+            'title'             => __('Show title', 'dynamo'),
+            'rating'            => __('Show star rating', 'dynamo'),
+            'price'             => __('Show price', 'dynamo'),
+            'short-description' => __('Show short description', 'dynamo'),
+            'add-to-cart'       => __('Show add-to-cart button', 'dynamo'),
+        ];
+
+        foreach ($labels as $element => $label) {
+            $token      = 'woocommerce-card-show-' . $element;
+            $setting_id = 'dynamo_woocommerce_card_show_' . str_replace('-', '_', $element);
+            $wp_customize->add_setting($setting_id, [
+                'default'           => $registry->get($token) ?? '1',
+                'sanitize_callback' => [$this, 'sanitize_boolish'],
+                'transport'         => 'postMessage',
+            ]);
+            $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
+                'label'   => $label,
+                'section' => 'dynamo_woocommerce_product_cards',
+                'type'    => 'checkbox',
+            ]));
+        }
+    }
+
+    public function apply_product_card_visibility(): void {
+        foreach (self::PRODUCT_CARD_REMOVABLE as $element => $spec) {
+            if (!$this->is_card_element_visible($element)) {
+                remove_action($spec['tag'], $spec['callback'], $spec['priority']);
+            }
+        }
+        if ($this->is_card_element_visible('short-description')) {
+            add_action('woocommerce_after_shop_loop_item_title', [$this, 'render_card_short_description'], 15);
+        }
+    }
+
+    public function render_card_short_description(): void {
+        echo '<div class="dynamo-card-short-description">';
+        if (function_exists('the_excerpt')) {
+            the_excerpt();
+        }
+        echo '</div>';
+    }
+
+    private function is_card_element_visible(string $element): bool {
+        $setting_id = 'dynamo_woocommerce_card_show_' . str_replace('-', '_', $element);
+        $saved      = get_theme_mod($setting_id);
+        if (false === $saved) {
+            $saved = (new Dynamo_Token_Registry())->get('woocommerce-card-show-' . $element) ?? '1';
+        }
+        return '1' === (string) $saved;
     }
 
     private function register_cart_checkout_section(object $wp_customize): void {

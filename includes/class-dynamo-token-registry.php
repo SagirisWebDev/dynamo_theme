@@ -89,6 +89,13 @@ class Dynamo_Token_Registry {
 
         'woocommerce-cart-checkout-button-text' => '',
         'woocommerce-cart-cross-sells-enabled'  => '1',
+
+        'woocommerce-card-show-image'             => '1',
+        'woocommerce-card-show-title'             => '1',
+        'woocommerce-card-show-price'             => '1',
+        'woocommerce-card-show-rating'            => '1',
+        'woocommerce-card-show-short-description' => '0',
+        'woocommerce-card-show-add-to-cart'       => '1',
     ];
 
     public function get(string $key): ?string {
