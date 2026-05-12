@@ -157,4 +157,60 @@ class BindingValidatorTest extends TestCase {
         $this->assertNotEmpty($errors);
         $this->assertStringContainsString('incompatible', strtolower(implode(' ', $errors)));
     }
+
+    private function validNumberArgs(array $overrides = []): array {
+        return array_merge([
+            'id'       => 'header_opacity',
+            'type'     => 'number',
+            'label'    => 'Header opacity',
+            'section'  => 'header',
+            'selector' => '.site-header',
+            'property' => 'opacity',
+        ], $overrides);
+    }
+
+    public function test_number_with_opacity_is_valid_without_unit(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validNumberArgs());
+        $this->assertSame([], $errors);
+    }
+
+    public function test_range_with_opacity_is_valid_without_unit(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validNumberArgs(['type' => 'range']));
+        $this->assertSame([], $errors);
+    }
+
+    public function test_number_with_padding_without_unit_is_incompatible(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validNumberArgs([
+            'property' => 'padding-block',
+        ]));
+        $this->assertNotEmpty($errors);
+        $this->assertStringContainsString('incompatible', strtolower(implode(' ', $errors)));
+    }
+
+    public function test_number_with_padding_and_unit_is_valid(): void {
+        // unit promotes type categories to include 'length'.
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validNumberArgs([
+            'property' => 'padding-block',
+            'unit'     => 'rem',
+        ]));
+        $this->assertSame([], $errors);
+    }
+
+    public function test_range_with_padding_and_unit_is_valid(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validNumberArgs([
+            'type'     => 'range',
+            'property' => 'padding-block',
+            'unit'     => 'rem',
+        ]));
+        $this->assertSame([], $errors);
+    }
+
+    public function test_number_with_color_property_is_incompatible_even_with_unit(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validNumberArgs([
+            'property' => 'color',
+            'unit'     => 'rem',
+        ]));
+        $this->assertNotEmpty($errors);
+        $this->assertStringContainsString('incompatible', strtolower(implode(' ', $errors)));
+    }
 }

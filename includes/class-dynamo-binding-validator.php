@@ -22,6 +22,14 @@ class Dynamo_Binding_Validator {
             if (empty($type_categories)) {
                 $errors[] = "Unknown type: {$type}";
             }
+            // number/range with a unit produce [number, length] per PRD.
+            if (in_array($type, ['number', 'range'], true)
+                && isset($args['unit']) && '' !== $args['unit']
+                && Dynamo_CSS_Vocabulary::is_unit((string) $args['unit'])
+                && !in_array('length', $type_categories, true)
+            ) {
+                $type_categories[] = 'length';
+            }
         } else {
             $type_categories = [];
         }

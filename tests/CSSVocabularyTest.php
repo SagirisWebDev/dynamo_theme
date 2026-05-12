@@ -101,6 +101,38 @@ class CSSVocabularyTest extends TestCase {
         $this->assertContains('string', Dynamo_CSS_Vocabulary::property_categories('content'));
     }
 
+    public function test_property_categories_for_padding_includes_length(): void {
+        $this->assertContains('length', Dynamo_CSS_Vocabulary::property_categories('padding'));
+    }
+
+    public function test_property_categories_for_padding_block_includes_length(): void {
+        $this->assertContains('length', Dynamo_CSS_Vocabulary::property_categories('padding-block'));
+    }
+
+    public function test_property_categories_for_width_includes_length_and_keyword(): void {
+        $categories = Dynamo_CSS_Vocabulary::property_categories('width');
+        $this->assertContains('length', $categories);
+        $this->assertContains('keyword', $categories);
+    }
+
+    public function test_property_categories_for_border_width_is_length_only(): void {
+        $this->assertSame(['length'], Dynamo_CSS_Vocabulary::property_categories('border-width'));
+    }
+
+    public function test_property_categories_for_font_size_includes_length_and_number(): void {
+        $categories = Dynamo_CSS_Vocabulary::property_categories('font-size');
+        $this->assertContains('length', $categories);
+        $this->assertContains('number', $categories);
+    }
+
+    public function test_property_categories_for_opacity_includes_number(): void {
+        $this->assertSame(['number'], Dynamo_CSS_Vocabulary::property_categories('opacity'));
+    }
+
+    public function test_property_categories_for_z_index_includes_number(): void {
+        $this->assertContains('number', Dynamo_CSS_Vocabulary::property_categories('z-index'));
+    }
+
     public function test_dynamo_binding_categories_filter_extends_type_map(): void {
         add_filter('dynamo_binding_categories', function(array $map): array {
             $map['custom-type'] = ['keyword'];

@@ -83,8 +83,43 @@ class Dynamo_CSS_Vocabulary {
             'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color',
             'outline-color', 'caret-color', 'accent-color', 'fill', 'stroke',
         ];
+        $length_keyword_props = [
+            'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
+            'padding', 'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+            'padding-block', 'padding-inline',
+            'margin', 'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+            'margin-block', 'margin-inline',
+            'top', 'right', 'bottom', 'left', 'inset',
+            'border-radius',
+            'border-top-left-radius', 'border-top-right-radius',
+            'border-bottom-left-radius', 'border-bottom-right-radius',
+            'gap', 'row-gap', 'column-gap',
+        ];
+        $length_props = [
+            'border-width',
+            'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+        ];
+        $length_number_keyword_props = [
+            'font-size', 'line-height', 'letter-spacing', 'word-spacing',
+        ];
+        $number_props = [
+            'opacity', 'flex-grow', 'flex-shrink', 'z-index', 'order',
+        ];
+        $keyword_props = [
+            'display', 'position',
+            'flex-direction', 'flex-wrap',
+            'justify-content', 'align-items', 'align-content', 'align-self',
+            'text-align', 'text-transform', 'text-decoration',
+            'font-weight', 'font-style',
+            'border-style',
+            'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style',
+            'cursor', 'visibility',
+            'overflow', 'overflow-x', 'overflow-y',
+            'white-space', 'word-break', 'box-sizing',
+        ];
         $string_keyword_props = ['font-family'];
         $string_props         = ['content'];
+        $url_keyword_props    = ['background-image', 'list-style-image'];
         $any_props = [
             'background', 'border', 'outline', 'box-shadow', 'text-shadow',
             'transform', 'transition', 'animation',
@@ -96,11 +131,29 @@ class Dynamo_CSS_Vocabulary {
         foreach ($color_props as $p) {
             $map[$p] = ['color'];
         }
+        foreach ($length_keyword_props as $p) {
+            $map[$p] = ['length', 'keyword'];
+        }
+        foreach ($length_props as $p) {
+            $map[$p] = ['length'];
+        }
+        foreach ($length_number_keyword_props as $p) {
+            $map[$p] = ['length', 'number', 'keyword'];
+        }
+        foreach ($number_props as $p) {
+            $map[$p] = ['number'];
+        }
+        foreach ($keyword_props as $p) {
+            $map[$p] = ['keyword'];
+        }
         foreach ($string_keyword_props as $p) {
             $map[$p] = ['string', 'keyword'];
         }
         foreach ($string_props as $p) {
             $map[$p] = ['string'];
+        }
+        foreach ($url_keyword_props as $p) {
+            $map[$p] = ['url', 'keyword'];
         }
         foreach ($any_props as $p) {
             $map[$p] = ['any'];

@@ -51,6 +51,58 @@ class BindingCSSRendererTest extends TestCase {
         $this->assertMatchesRegularExpression('/:root\s*\{[^}]*--dynamo-header_bg/s', $css);
     }
 
+    public function test_renderer_suffixes_unit_in_variable_layer_when_set(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'header_pad',
+            'type'     => 'range',
+            'label'    => 'Header pad',
+            'section'  => 'header',
+            'selector' => '.site-header',
+            'property' => 'padding-block',
+            'unit'     => 'rem',
+            'default'  => 1.5,
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString('--dynamo-header_pad: 1.5rem;', $css);
+        $this->assertStringContainsString('.site-header { padding-block: var(--dynamo-header_pad); }', $css);
+    }
+
+    public function test_renderer_emits_bare_value_when_no_unit(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'header_opacity',
+            'type'     => 'number',
+            'label'    => 'Header opacity',
+            'section'  => 'header',
+            'selector' => '.site-header',
+            'property' => 'opacity',
+            'default'  => 0.5,
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString('--dynamo-header_opacity: 0.5;', $css);
+    }
+
+    public function test_renderer_does_not_double_suffix_when_saved_value_already_has_unit(): void {
+        // If the user later switches to a saved string that already has a unit,
+        // the renderer should not re-suffix. Tested via theme_mod containing e.g. "2rem".
+        set_theme_mod('dynamo_header_pad', '2rem');
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'header_pad',
+            'type'     => 'range',
+            'label'    => 'Header pad',
+            'section'  => 'header',
+            'selector' => '.site-header',
+            'property' => 'padding-block',
+            'unit'     => 'rem',
+            'default'  => 1.5,
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString('--dynamo-header_pad: 2rem;', $css);
+        $this->assertStringNotContainsString('2remrem', $css);
+    }
+
     public function test_multiple_bindings_each_emit_both_layers(): void {
         $registry = new Dynamo_Binding_Registry();
         $registry->register([

@@ -188,6 +188,87 @@ class BindingEndToEndTest extends TestCase {
         $this->assertArrayNotHasKey('choicesMap', $entry);
     }
 
+    public function test_range_binding_full_path_with_unit_suffix(): void {
+        dynamo_config_customizer([
+            'id'          => 'header_pad',
+            'type'        => 'range',
+            'label'       => 'Header pad',
+            'section'     => 'header_styling',
+            'selector'    => '.site-header',
+            'property'    => 'padding-block',
+            'unit'        => 'rem',
+            'default'     => 1.5,
+            'input_attrs' => ['min' => 0, 'max' => 6, 'step' => 0.25],
+        ]);
+
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter(Dynamo_Binding_Registry::instance()))
+            ->apply($manager);
+
+        $this->assertSame('range', $manager->controls[0]->args['type']);
+        $this->assertSame(
+            ['min' => 0, 'max' => 6, 'step' => 0.25],
+            $manager->controls[0]->args['input_attrs']
+        );
+        $this->assertSame('floatval', $manager->settings['dynamo_header_pad']['sanitize_callback']);
+
+        $css = (new Dynamo_Binding_CSS_Renderer(Dynamo_Binding_Registry::instance()))->render();
+        $this->assertStringContainsString('--dynamo-header_pad: 1.5rem;', $css);
+        $this->assertStringContainsString('.site-header { padding-block: var(--dynamo-header_pad); }', $css);
+
+        $entry = (new Dynamo_Binding_Preview_Bridge(Dynamo_Binding_Registry::instance()))
+            ->build_metadata()['dynamo_header_pad'];
+        $this->assertSame('rem', $entry['unit']);
+    }
+
+    public function test_number_binding_full_path_without_unit_for_opacity(): void {
+        dynamo_config_customizer([
+            'id'       => 'header_opacity',
+            'type'     => 'number',
+            'label'    => 'Header opacity',
+            'section'  => 'header_styling',
+            'selector' => '.site-header',
+            'property' => 'opacity',
+            'default'  => 0.8,
+        ]);
+
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter(Dynamo_Binding_Registry::instance()))
+            ->apply($manager);
+        $this->assertSame('number', $manager->controls[0]->args['type']);
+
+        $css = (new Dynamo_Binding_CSS_Renderer(Dynamo_Binding_Registry::instance()))->render();
+        $this->assertStringContainsString('--dynamo-header_opacity: 0.8;', $css);
+        $this->assertStringNotContainsString('0.8rem', $css);
+    }
+
+    public function test_number_with_length_property_rejected_without_unit(): void {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/incompatible/i');
+        dynamo_config_customizer([
+            'id'       => 'broken_pad',
+            'type'     => 'number',
+            'label'    => 'Broken pad',
+            'section'  => 'header',
+            'selector' => '.site-header',
+            'property' => 'padding-block',
+        ]);
+    }
+
+    public function test_number_with_bad_unit_rejected(): void {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/unit/i');
+        dynamo_config_customizer([
+            'id'       => 'broken_pad',
+            'type'     => 'range',
+            'label'    => 'Broken pad',
+            'section'  => 'header',
+            'selector' => '.site-header',
+            'property' => 'padding-block',
+            'unit'     => 'pxx',
+        ]);
+    }
+
     public function test_css_generator_appends_binding_output_after_token_root_block(): void {
         dynamo_config_customizer([
             'id'       => 'header_bg',

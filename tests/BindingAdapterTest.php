@@ -172,4 +172,61 @@ class BindingAdapterTest extends TestCase {
         (new Dynamo_Customizer_Binding_Adapter($this->textRegistry()))->apply($manager);
         $this->assertSame('', $manager->settings['dynamo_heading_font']['default']);
     }
+
+    private function numberRegistry(array $overrides = []): Dynamo_Binding_Registry {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register(array_merge([
+            'id'       => 'header_pad',
+            'type'     => 'range',
+            'label'    => 'Header pad',
+            'section'  => 'header',
+            'selector' => '.site-header',
+            'property' => 'padding-block',
+            'unit'     => 'rem',
+        ], $overrides));
+        return $registry;
+    }
+
+    public function test_range_type_uses_generic_control_with_type_range(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->numberRegistry()))->apply($manager);
+        $control = $manager->controls[0];
+        $this->assertInstanceOf(WP_Customize_Control::class, $control);
+        $this->assertSame('range', $control->args['type']);
+    }
+
+    public function test_number_type_uses_generic_control_with_type_number(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->numberRegistry([
+            'type'     => 'number',
+            'property' => 'opacity',
+            'unit'     => null,
+        ])))->apply($manager);
+        // The 'unit' => null override is dropped by Registry::normalize because
+        // it sets a default-via-key check; just verify type passes through.
+        $this->assertSame('number', $manager->controls[0]->args['type']);
+    }
+
+    public function test_number_and_range_use_floatval_sanitizer_by_default(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->numberRegistry()))->apply($manager);
+        $this->assertSame('floatval', $manager->settings['dynamo_header_pad']['sanitize_callback']);
+    }
+
+    public function test_number_default_is_zero_when_omitted(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->numberRegistry()))->apply($manager);
+        $this->assertSame(0, $manager->settings['dynamo_header_pad']['default']);
+    }
+
+    public function test_input_attrs_pass_through_to_control_args(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->numberRegistry([
+            'input_attrs' => ['min' => 0, 'max' => 6, 'step' => 0.25, 'placeholder' => 'rem'],
+        ])))->apply($manager);
+        $this->assertSame(
+            ['min' => 0, 'max' => 6, 'step' => 0.25, 'placeholder' => 'rem'],
+            $manager->controls[0]->args['input_attrs']
+        );
+    }
 }

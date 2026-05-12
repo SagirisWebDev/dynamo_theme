@@ -37,8 +37,21 @@ class Dynamo_Binding_CSS_Renderer {
     private function resolve_value(array $binding): string {
         $saved = get_theme_mod($binding['setting_id']);
         if ('' !== $saved && false !== $saved && null !== $saved) {
-            return (string) $saved;
+            $value = (string) $saved;
+        } else {
+            $value = (string) $binding['default'];
         }
-        return (string) $binding['default'];
+        return self::apply_unit($value, $binding);
+    }
+
+    private static function apply_unit(string $value, array $binding): string {
+        $unit = $binding['unit'] ?? '';
+        if ('' === $unit || '' === $value) {
+            return $value;
+        }
+        if (str_ends_with($value, $unit)) {
+            return $value;
+        }
+        return $value . $unit;
     }
 }
