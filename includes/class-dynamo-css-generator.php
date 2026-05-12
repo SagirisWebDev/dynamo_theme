@@ -34,14 +34,20 @@ class Dynamo_CSS_Generator {
             }
         }
 
+        $bindings_css = '';
+        if (class_exists('Dynamo_Binding_Registry') && class_exists('Dynamo_Binding_CSS_Renderer')) {
+            $bindings_css = (new Dynamo_Binding_CSS_Renderer(Dynamo_Binding_Registry::instance()))->render();
+        }
+
         $root  = empty($parts) ? '' : ":root {\n" . implode("\n", $parts) . "\n}";
         $rules = $woocommerce_seen ? $this->generate_woocommerce_rules() : '';
 
-        if ($root === '' && $rules === '') {
+        if ($root === '' && $rules === '' && $bindings_css === '') {
             return '';
         }
 
-        return trim($root . ($rules !== '' ? "\n\n" . $rules : ''));
+        $sections = array_filter([$root, $rules, $bindings_css], fn($s) => $s !== '');
+        return trim(implode("\n\n", $sections));
     }
 
     public function generate_woocommerce_rules(): string {

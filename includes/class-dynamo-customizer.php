@@ -60,6 +60,9 @@ class Dynamo_Customizer {
         $this->register_spacing($wp_customize);
         $this->register_layout($wp_customize);
         $this->register_borders_and_shadows($wp_customize);
+
+        (new Dynamo_Customizer_Binding_Adapter(Dynamo_Binding_Registry::instance()))
+            ->apply($wp_customize);
     }
 
     private function register_typography(object $wp_customize): void {
@@ -342,11 +345,26 @@ class Dynamo_Customizer {
             true
         );
 
-        
+
+
         $css = $this->cache->get() ?? $this->generator->generate() ?? '';
         wp_localize_script('dynamo-customizer-preview', 'dynamoPreview', apply_filters('dynamo_customizer_preview_data', [
             'initialCss' => $css,
         ]));
+
+        wp_enqueue_script(
+            'dynamo-binding-preview',
+            DYNAMO_URL . 'assets/js/dynamo-binding-preview.js',
+            ['customize-preview'],
+            DYNAMO_VERSION,
+            true
+        );
+
+        wp_localize_script(
+            'dynamo-binding-preview',
+            'dynamoBindings',
+            (new Dynamo_Binding_Preview_Bridge(Dynamo_Binding_Registry::instance()))->build_metadata()
+        );
     }
 
     public function enqueue_controls_script(): void {

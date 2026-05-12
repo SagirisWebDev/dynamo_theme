@@ -166,6 +166,10 @@ function wp_kses_post(string $data): string {
     return $data;
 }
 
+function set_theme_mod(string $name, mixed $value): void {
+    $GLOBALS['wp_theme_mods'][$name] = $value;
+}
+
 
 function update_option(string $option, mixed $value): bool {
     $GLOBALS['wp_options'][$option] = $value;
@@ -243,8 +247,19 @@ require_once DYNAMO_PATH . 'includes/class-dynamo-css-cache.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-customizer.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-theme-json-sync.php';
 require_once DYNAMO_PATH . 'includes/woocommerce/class-dynamo-woocommerce.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-css-vocabulary.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-binding-validator.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-binding-registry.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-binding-css-renderer.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-customizer-binding-adapter.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-binding-preview-bridge.php';
+require_once DYNAMO_PATH . 'includes/dynamo-binding-api.php';
 require_once __DIR__ . '/MakesCustomizer.php';
 require_once __DIR__ . '/FakeCustomizeManager.php';
+
+function wp_localize_script(string $handle, string $object_name, mixed $data): void {
+    $GLOBALS['wp_localized'][$handle][$object_name] = $data;
+}
 
 function dynamo_bust_css_cache(): void {
     (new Dynamo_CSS_Cache())->bust();

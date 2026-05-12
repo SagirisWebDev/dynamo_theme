@@ -8,6 +8,13 @@ define('DYNAMO_URL', trailingslashit(get_template_directory_uri()));
 require_once DYNAMO_PATH . '/includes/class-dynamo-token-registry.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-font-manifest.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-font-renderer.php';
+require_once DYNAMO_PATH . '/includes/class-dynamo-css-vocabulary.php';
+require_once DYNAMO_PATH . '/includes/class-dynamo-binding-validator.php';
+require_once DYNAMO_PATH . '/includes/class-dynamo-binding-registry.php';
+require_once DYNAMO_PATH . '/includes/class-dynamo-binding-css-renderer.php';
+require_once DYNAMO_PATH . '/includes/class-dynamo-customizer-binding-adapter.php';
+require_once DYNAMO_PATH . '/includes/class-dynamo-binding-preview-bridge.php';
+require_once DYNAMO_PATH . '/includes/dynamo-binding-api.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-css-generator.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-css-cache.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-css-output.php';
@@ -17,6 +24,10 @@ require_once DYNAMO_PATH . '/includes/class-dynamo-theme-json-sync.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-options.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-breadcrumbs.php';
 require_once DYNAMO_PATH . '/includes/woocommerce/class-dynamo-woocommerce.php';
+
+if (file_exists(DYNAMO_PATH . '/dynamo-extend-customizer.php')) {
+    require_once DYNAMO_PATH . '/dynamo-extend-customizer.php';
+}
 
 add_action('after_setup_theme', function(): void {
     $registry          = new Dynamo_Token_Registry();
