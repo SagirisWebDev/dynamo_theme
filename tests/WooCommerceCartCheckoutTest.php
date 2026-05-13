@@ -31,11 +31,11 @@ class WooCommerceCartCheckoutTest extends TestCase {
         $this->assertSame('dynamo_woocommerce', $manager->sections['dynamo_woocommerce_cart_checkout']['panel']);
     }
 
-    public function test_customizer_registers_button_text_setting_with_postmessage(): void {
+    public function test_customizer_registers_button_text_setting_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         $this->assertArrayHasKey('dynamo_woocommerce_cart_button_text', $manager->settings);
-        $this->assertSame('postMessage', $manager->settings['dynamo_woocommerce_cart_button_text']['transport']);
+        $this->assertSame('refresh', $manager->settings['dynamo_woocommerce_cart_button_text']['transport']);
     }
 
     public function test_customizer_registers_button_text_as_text_control(): void {
@@ -46,11 +46,11 @@ class WooCommerceCartCheckoutTest extends TestCase {
         $this->assertSame('text', $control->args['type'] ?? null);
     }
 
-    public function test_customizer_registers_cross_sells_toggle_with_postmessage(): void {
+    public function test_customizer_registers_cross_sells_toggle_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         $this->assertArrayHasKey('dynamo_woocommerce_cross_sells_enabled', $manager->settings);
-        $this->assertSame('postMessage', $manager->settings['dynamo_woocommerce_cross_sells_enabled']['transport']);
+        $this->assertSame('refresh', $manager->settings['dynamo_woocommerce_cross_sells_enabled']['transport']);
 
         $control = $this->findControl($manager, 'dynamo_woocommerce_cross_sells_enabled');
         $this->assertNotNull($control);

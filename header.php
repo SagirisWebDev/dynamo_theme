@@ -29,15 +29,21 @@
                 <p class="site-description"><?php echo esc_html( $description ); ?></p>
             <?php endif; ?>
         <?php endif; ?>
+        <?php $dynamo_header_justify = (string) get_theme_mod( 'dynamo_header_menu_cart', 'flex-end' ); ?>
+        <div class="dynamo-header-menu-cart dynamo-header-menu-cart--<?php echo esc_attr( $dynamo_header_justify ); ?>">
         <?php
+        $dynamo_header_cart_on = '1' === (string) get_theme_mod( 'dynamo_woocommerce_header_cart_enabled', '1' );
         wp_nav_menu( [
             'theme_location'  => 'primary',
             'menu_id'         => 'primary-menu',
-            'container'       => 'div',
+            'container'       => 'nav',
             'container_class' => 'menu-primary-container',
             'fallback_cb'     => false,
         ] );
         ?>
-        <?php do_action( 'dynamo_header_cart' ); ?>
+        <?php if ( $dynamo_header_cart_on ) : ?>
+            <?php do_action( 'dynamo_header_cart' ); ?>
+            <?php endif; ?>
+        </div>
     </div>
 </header>

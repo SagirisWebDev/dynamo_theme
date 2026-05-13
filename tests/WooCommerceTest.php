@@ -79,13 +79,14 @@ class WooCommerceTest extends TestCase {
     }
 
     public function test_enqueue_assets_does_nothing_on_non_woocommerce_pages(): void {
+        $GLOBALS['wp_theme_mods']['dynamo_woocommerce_header_cart_enabled'] = '0';
         $this->woo->enqueue_assets();
         $this->assertNotContains('dynamo-woocommerce', $GLOBALS['wp_enqueued_styles']);
     }
 
     public function test_init_registers_hooks_on_correct_actions(): void {
         $this->woo->init();
-        $this->assertArrayHasKey('after_setup_theme', $GLOBALS['wp_filter']);
+        $this->assertTrue(current_theme_supports('woocommerce'));
         $this->assertArrayHasKey('wp_enqueue_scripts', $GLOBALS['wp_filter']);
     }
 }

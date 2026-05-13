@@ -42,11 +42,11 @@ class WooCommerceHeaderCartTest extends TestCase {
         $this->assertSame('dynamo_woocommerce', $manager->sections['dynamo_woocommerce_header_cart']['panel']);
     }
 
-    public function test_customizer_registers_enable_toggle_setting_with_postmessage(): void {
+    public function test_customizer_registers_enable_toggle_setting_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         $this->assertArrayHasKey('dynamo_woocommerce_header_cart_enabled', $manager->settings);
-        $this->assertSame('postMessage', $manager->settings['dynamo_woocommerce_header_cart_enabled']['transport']);
+        $this->assertSame('refresh', $manager->settings['dynamo_woocommerce_header_cart_enabled']['transport']);
     }
 
     public function test_customizer_registers_position_select_with_three_choices(): void {
@@ -155,12 +155,11 @@ class WooCommerceHeaderCartTest extends TestCase {
 
     // --- Styles ---
 
-    public function test_woocommerce_css_contains_header_cart_positioning_rules(): void {
+    public function test_woocommerce_css_contains_header_cart_base_rules(): void {
         $css = (string) file_get_contents(DYNAMO_PATH . 'assets/css/woocommerce.css');
         $this->assertStringContainsString('.dynamo-header-cart', $css);
-        $this->assertStringContainsString('.dynamo-header-cart--left', $css);
-        $this->assertStringContainsString('.dynamo-header-cart--center', $css);
-        $this->assertStringContainsString('.dynamo-header-cart--right', $css);
+        $this->assertStringContainsString('.dynamo-header-cart__icon', $css);
+        $this->assertStringContainsString('.dynamo-header-cart__count', $css);
     }
 
     public function test_enqueue_assets_enqueues_wc_cart_fragments_on_wc_pages(): void {

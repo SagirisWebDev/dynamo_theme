@@ -14,7 +14,7 @@ class Dynamo_CSS_Generator {
     public function generate(): string {
         $modules = apply_filters(
             'dynamo_css_modules',
-            ['colors', 'typography', 'spacing', 'layout', 'borders', 'shadows', 'woocommerce']
+            ['colors', 'typography', 'spacing', 'layout', 'borders', 'shadows', 'header', 'woocommerce']
         );
 
         if (empty($modules)) {
@@ -46,28 +46,38 @@ class Dynamo_CSS_Generator {
 
     public function generate_woocommerce_rules(): string {
         return <<<CSS
-.woocommerce span.onsale {
-  background-color: var(--dynamo-woocommerce-sale-badge-bg);
-  color: var(--dynamo-woocommerce-sale-badge-color);
-}
-.woocommerce .star-rating,
-.woocommerce .star-rating::before,
-.woocommerce .star-rating span::before {
-  color: var(--dynamo-woocommerce-star-color);
-}
-.woocommerce a.button.add_to_cart_button,
-.woocommerce button.single_add_to_cart_button,
-.woocommerce-page button.single_add_to_cart_button {
-  background-color: var(--dynamo-colors-primary);
-  color: var(--dynamo-colors-background);
-}
-.woocommerce ul.products li.product {
-  background-color: var(--dynamo-colors-background);
-  border: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
-  border-radius: var(--dynamo-borders-radius);
-  box-shadow: var(--dynamo-shadows-md);
-}
-CSS;
+            .woocommerce span.onsale {
+            background-color: var(--dynamo-woocommerce-sale-badge-bg);
+            color: var(--dynamo-woocommerce-sale-badge-color);
+            }
+            .woocommerce .star-rating,
+            .woocommerce .star-rating::before,
+            .woocommerce .star-rating span::before {
+            color: var(--dynamo-woocommerce-star-color);
+            }
+            .woocommerce a.button.add_to_cart_button,
+            .woocommerce button.button.single_add_to_cart_button,
+            .woocommerce-page button.button.single_add_to_cart_button {
+            background-color: var(--dynamo-woocommerce-add-to-cart-bg);
+            color: var(--dynamo-woocommerce-add-to-cart-color);
+            }
+            .woocommerce div.product p.price,
+            .woocommerce div.product span.price,
+            .woocommerce-page div.product p.price,
+            .woocommerce-page div.product span.price {
+            color: var(--dynamo-woocommerce-single-price-color);
+            }
+            .woocommerce ul.products li.product .price,
+            .woocommerce-page ul.products li.product .price {
+            color: var(--dynamo-woocommerce-loop-price-color);
+            }
+            .woocommerce ul.products li.product {
+            background-color: var(--dynamo-colors-background);
+            border: var(--dynamo-borders-width) solid var(--dynamo-borders-color);
+            border-radius: var(--dynamo-borders-radius);
+            box-shadow: var(--dynamo-shadows-md);
+            }
+        CSS;
     }
 
     // Last-resort fallback when a typography token references a slug
@@ -76,6 +86,10 @@ CSS;
     private const UNKNOWN_SLUG_FALLBACK = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
 
     private function module_declarations(string $module): string {
+        if ($module === 'shadows') {
+            return $this->shadows_declarations();
+        }
+
         $lines = [];
         foreach ($this->registry->all() as $key => $value) {
             if (str_starts_with($key, $module)) {
@@ -114,5 +128,46 @@ CSS;
         }
         $label = $entry['label'] ?? $slug;
         return '"' . $label . '", ' . $fallback;
+    }
+
+    private function shadows_declarations(): string {
+        $lines = [];
+        foreach (['sm', 'md'] as $size) {
+            $length  = $this->resolve_value("shadows-{$size}-length");
+            $color   = $this->resolve_value("shadows-{$size}-color");
+            $opacity = $this->resolve_value("shadows-{$size}-opacity");
+            if ($length === '' || $color === '') {
+                continue;
+            }
+            $rgb = $this->hex_to_rgb_triplet($color);
+            $color_fn = "rgb({$rgb} / {$opacity})";
+            $layers   = array_map(
+                fn($layer) => trim($layer) . ' ' . $color_fn,
+                explode(',', $length)
+            );
+            $lines[] = "  --dynamo-shadows-{$size}: " . implode(', ', $layers) . ';';
+        }
+        return implode("\n", $lines);
+    }
+
+    private function resolve_value(string $token): string {
+        $value      = $this->registry->get($token) ?? '';
+        $setting_id = 'dynamo_' . str_replace('-', '_', $token);
+        $saved      = get_theme_mod($setting_id);
+        if ('' !== $saved && false !== $saved) {
+            $value = $saved;
+        }
+        return (string) $value;
+    }
+
+    private function hex_to_rgb_triplet(string $hex): string {
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (strlen($hex) !== 6 || !ctype_xdigit($hex)) {
+            return '0 0 0';
+        }
+        return hexdec(substr($hex, 0, 2)) . ' ' . hexdec(substr($hex, 2, 2)) . ' ' . hexdec(substr($hex, 4, 2));
     }
 }

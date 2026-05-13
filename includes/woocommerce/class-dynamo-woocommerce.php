@@ -4,9 +4,13 @@ declare(strict_types=1);
 class Dynamo_WooCommerce {
 
     private const COLOUR_TOKENS = [
-        'woocommerce-sale-badge-bg'    => 'Sale Badge Background',
-        'woocommerce-sale-badge-color' => 'Sale Badge Text',
-        'woocommerce-star-color'       => 'Star Rating',
+        'woocommerce-sale-badge-bg'      => 'Sale Badge Background',
+        'woocommerce-sale-badge-color'   => 'Sale Badge Text',
+        'woocommerce-star-color'         => 'Star Rating',
+        'woocommerce-add-to-cart-bg'     => 'Add to Cart Background',
+        'woocommerce-add-to-cart-color'  => 'Add to Cart Text',
+        'woocommerce-single-price-color' => 'Single Product Price',
+        'woocommerce-loop-price-color'   => 'Shop Loop Price',
     ];
 
     private const HEADER_CART_POSITIONS = ['left', 'center', 'right'];
@@ -29,10 +33,11 @@ class Dynamo_WooCommerce {
     ];
 
     public function init(): void {
-        add_action('after_setup_theme', [$this, 'register_theme_support']);
-        add_action('after_setup_theme', [$this, 'replace_content_wrappers'], 11);
+        $this->register_theme_support();
+        $this->replace_content_wrappers();
         add_action('wp_enqueue_scripts', [$this, 'enqueue_assets']);
         add_action('customize_register', [$this, 'register_customizer']);
+        add_action('customize_controls_enqueue_scripts', [$this, 'enqueue_customizer_controls_assets']);
         add_action('dynamo_header_cart', [$this, 'render_header_cart_icon']);
         add_action('template_redirect', [$this, 'apply_single_product_visibility']);
         add_action('template_redirect', [$this, 'apply_cart_visibility']);
@@ -40,10 +45,10 @@ class Dynamo_WooCommerce {
         add_action('woocommerce_before_quantity_input_field', [$this, 'render_quantity_minus_button']);
         add_action('woocommerce_after_quantity_input_field', [$this, 'render_quantity_plus_button']);
         add_filter('gettext', [$this, 'filter_cart_button_text'], 10, 3);
-        add_filter('loop_shop_columns', [$this, 'filter_loop_shop_columns']);
-        add_filter('loop_shop_per_page', [$this, 'filter_loop_shop_per_page']);
+        add_filter('loop_shop_columns', [$this, 'filter_loop_shop_columns'], PHP_INT_MAX);
+        add_filter('loop_shop_per_page', [$this, 'filter_loop_shop_per_page'], PHP_INT_MAX);
         add_filter('woocommerce_add_to_cart_fragments', [$this, 'add_cart_count_fragment']);
-        add_filter('related_products_args', [$this, 'filter_related_products_args']);
+        add_filter('woocommerce_output_related_products_args', [$this, 'filter_related_products_args']);
     }
 
     public function register_customizer(object $wp_customize): void {
@@ -84,7 +89,7 @@ class Dynamo_WooCommerce {
             $wp_customize->add_setting($setting_id, [
                 'default'           => $registry->get($token) ?? '1',
                 'sanitize_callback' => [$this, 'sanitize_boolish'],
-                'transport'         => 'postMessage',
+                'transport'         => 'refresh',
             ]);
             $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
                 'label'   => $label,
@@ -133,7 +138,7 @@ class Dynamo_WooCommerce {
         $wp_customize->add_setting('dynamo_woocommerce_cart_button_text', [
             'default'           => $registry->get('woocommerce-cart-checkout-button-text') ?? '',
             'sanitize_callback' => 'sanitize_text_field',
-            'transport'         => 'postMessage',
+            'transport'         => 'refresh',
         ]);
         $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'dynamo_woocommerce_cart_button_text', [
             'label'       => __('Checkout button text', 'dynamo'),
@@ -145,7 +150,7 @@ class Dynamo_WooCommerce {
         $wp_customize->add_setting('dynamo_woocommerce_cross_sells_enabled', [
             'default'           => $registry->get('woocommerce-cart-cross-sells-enabled') ?? '1',
             'sanitize_callback' => [$this, 'sanitize_boolish'],
-            'transport'         => 'postMessage',
+            'transport'         => 'refresh',
         ]);
         $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'dynamo_woocommerce_cross_sells_enabled', [
             'label'   => __('Show cross-sells ("You may also like") on the cart page', 'dynamo'),
@@ -189,7 +194,7 @@ class Dynamo_WooCommerce {
         $wp_customize->add_setting('dynamo_woocommerce_quantity_buttons_enabled', [
             'default'           => $registry->get('woocommerce-quantity-buttons-enabled') ?? '1',
             'sanitize_callback' => [$this, 'sanitize_boolish'],
-            'transport'         => 'postMessage',
+            'transport'         => 'refresh',
         ]);
         $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'dynamo_woocommerce_quantity_buttons_enabled', [
             'label'   => __('Show +/- buttons on quantity inputs', 'dynamo'),
@@ -245,7 +250,7 @@ class Dynamo_WooCommerce {
             $wp_customize->add_setting($setting_id, [
                 'default'           => $registry->get($token) ?? '1',
                 'sanitize_callback' => [$this, 'sanitize_boolish'],
-                'transport'         => 'postMessage',
+                'transport'         => 'refresh',
             ]);
             $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
                 'label'   => $label,
@@ -257,7 +262,7 @@ class Dynamo_WooCommerce {
         $wp_customize->add_setting('dynamo_woocommerce_single_related_columns', [
             'default'           => $registry->get('woocommerce-single-related-columns') ?? '4',
             'sanitize_callback' => [$this, 'sanitize_related_columns'],
-            'transport'         => 'postMessage',
+            'transport'         => 'refresh',
         ]);
         $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'dynamo_woocommerce_single_related_columns', [
             'label'       => __('Related products columns', 'dynamo'),
@@ -325,7 +330,7 @@ class Dynamo_WooCommerce {
         $wp_customize->add_setting('dynamo_woocommerce_header_cart_enabled', [
             'default'           => $registry->get('woocommerce-header-cart-enabled') ?? '1',
             'sanitize_callback' => [$this, 'sanitize_boolish'],
-            'transport'         => 'postMessage',
+            'transport'         => 'refresh',
         ]);
         $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'dynamo_woocommerce_header_cart_enabled', [
             'label'   => __('Show cart icon in header', 'dynamo'),
@@ -336,7 +341,7 @@ class Dynamo_WooCommerce {
         $wp_customize->add_setting('dynamo_woocommerce_header_cart_position', [
             'default'           => $registry->get('woocommerce-header-cart-position') ?? 'right',
             'sanitize_callback' => [$this, 'sanitize_header_cart_position'],
-            'transport'         => 'postMessage',
+            'transport'         => 'refresh',
         ]);
         $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'dynamo_woocommerce_header_cart_position', [
             'label'   => __('Position', 'dynamo'),
@@ -445,7 +450,7 @@ class Dynamo_WooCommerce {
         $wp_customize->add_setting('dynamo_woocommerce_shop_columns', [
             'default'           => $registry->get('woocommerce-shop-columns') ?? '3',
             'sanitize_callback' => [$this, 'sanitize_shop_columns'],
-            'transport'         => 'postMessage',
+            'transport'         => 'refresh',
         ]);
         $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'dynamo_woocommerce_shop_columns', [
             'label'       => __('Columns per row', 'dynamo'),
@@ -457,7 +462,7 @@ class Dynamo_WooCommerce {
         $wp_customize->add_setting('dynamo_woocommerce_shop_products_per_page', [
             'default'           => $registry->get('woocommerce-shop-products-per-page') ?? '12',
             'sanitize_callback' => [$this, 'sanitize_products_per_page'],
-            'transport'         => 'postMessage',
+            'transport'         => 'refresh',
         ]);
         $wp_customize->add_control(new WP_Customize_Control($wp_customize, 'dynamo_woocommerce_shop_products_per_page', [
             'label'       => __('Products per page', 'dynamo'),
@@ -543,10 +548,11 @@ class Dynamo_WooCommerce {
     }
 
     public function enqueue_assets(): void {
-        if ($this->is_header_cart_enabled()) {
+        $header_cart_enabled = $this->is_header_cart_enabled();
+        if ($header_cart_enabled) {
             wp_enqueue_script('wc-cart-fragments');
         }
-        if (!$this->is_woocommerce_page()) {
+        if (!$this->is_woocommerce_page() && !$header_cart_enabled) {
             return;
         }
         wp_enqueue_style(
@@ -555,6 +561,9 @@ class Dynamo_WooCommerce {
             [],
             DYNAMO_VERSION
         );
+        if (!$this->is_woocommerce_page()) {
+            return;
+        }
         if ($this->is_quantity_buttons_enabled()) {
             wp_enqueue_script(
                 'dynamo-woocommerce-quantity',
@@ -571,5 +580,67 @@ class Dynamo_WooCommerce {
             || (function_exists('is_cart') && is_cart())
             || (function_exists('is_checkout') && is_checkout())
             || (function_exists('is_account_page') && is_account_page());
+    }
+
+    public function enqueue_customizer_controls_assets(): void {
+        wp_enqueue_script(
+            'dynamo-woocommerce-customizer-controls',
+            DYNAMO_URL . 'assets/js/woocommerce-customizer-controls.js',
+            ['customize-controls'],
+            DYNAMO_VERSION,
+            true
+        );
+        wp_localize_script('dynamo-woocommerce-customizer-controls', 'dynamoWooCustomizer', [
+            'sectionUrls' => $this->get_section_preview_urls(),
+        ]);
+    }
+
+    private function get_section_preview_urls(): array {
+        $urls = [];
+
+        if (function_exists('wc_get_page_id')) {
+            $shop_url = $this->get_wc_page_url('shop');
+            if ('' !== $shop_url) {
+                $urls['dynamo_woocommerce_shop_layout']  = $shop_url;
+                $urls['dynamo_woocommerce_product_cards'] = $shop_url;
+            }
+
+            $checkout_url = $this->get_wc_page_url('checkout');
+            if ('' !== $checkout_url) {
+                $urls['dynamo_woocommerce_cart_checkout'] = $checkout_url;
+            }
+        }
+
+        $product_url = $this->get_first_product_url();
+        if ('' !== $product_url) {
+            $urls['dynamo_woocommerce_single_product']    = $product_url;
+            $urls['dynamo_woocommerce_quantity_buttons']  = $product_url;
+        }
+
+        return $urls;
+    }
+
+    private function get_wc_page_url(string $page): string {
+        $page_id = wc_get_page_id($page);
+        if ($page_id <= 0) {
+            return '';
+        }
+        $url = get_permalink($page_id);
+        return is_string($url) ? $url : '';
+    }
+
+    private function get_first_product_url(): string {
+        $products = get_posts([
+            'post_type'      => 'product',
+            'post_status'    => 'publish',
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
+            'no_found_rows'  => true,
+        ]);
+        if (empty($products)) {
+            return '';
+        }
+        $url = get_permalink($products[0]);
+        return is_string($url) ? $url : '';
     }
 }

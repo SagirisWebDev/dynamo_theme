@@ -44,21 +44,21 @@ class WooCommerceSingleProductTest extends TestCase {
         $this->assertSame('dynamo_woocommerce', $manager->sections['dynamo_woocommerce_single_product']['panel']);
     }
 
-    public function test_customizer_registers_all_six_show_settings_with_postmessage(): void {
+    public function test_customizer_registers_all_six_show_settings_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         foreach (array_keys($this->element_specs) as $element) {
             $setting_id = 'dynamo_woocommerce_single_show_' . str_replace('-', '_', $element);
             $this->assertArrayHasKey($setting_id, $manager->settings, "Missing setting {$setting_id}");
-            $this->assertSame('postMessage', $manager->settings[$setting_id]['transport']);
+            $this->assertSame('refresh', $manager->settings[$setting_id]['transport']);
         }
     }
 
-    public function test_customizer_registers_related_columns_setting_with_postmessage(): void {
+    public function test_customizer_registers_related_columns_setting_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         $this->assertArrayHasKey('dynamo_woocommerce_single_related_columns', $manager->settings);
-        $this->assertSame('postMessage', $manager->settings['dynamo_woocommerce_single_related_columns']['transport']);
+        $this->assertSame('refresh', $manager->settings['dynamo_woocommerce_single_related_columns']['transport']);
         $this->assertSame('4', $manager->settings['dynamo_woocommerce_single_related_columns']['default']);
     }
 
@@ -91,7 +91,7 @@ class WooCommerceSingleProductTest extends TestCase {
 
     public function test_init_registers_related_products_args_filter(): void {
         (new Dynamo_WooCommerce())->init();
-        $this->assertArrayHasKey('related_products_args', $GLOBALS['wp_filter']);
+        $this->assertArrayHasKey('woocommerce_output_related_products_args', $GLOBALS['wp_filter']);
     }
 
     // --- apply_single_product_visibility ---
@@ -143,20 +143,20 @@ class WooCommerceSingleProductTest extends TestCase {
     public function test_related_products_args_returns_saved_column_count(): void {
         $GLOBALS['wp_theme_mods']['dynamo_woocommerce_single_related_columns'] = '6';
         (new Dynamo_WooCommerce())->init();
-        $args = apply_filters('related_products_args', ['posts_per_page' => 3, 'columns' => 3]);
+        $args = apply_filters('woocommerce_output_related_products_args', ['posts_per_page' => 3, 'columns' => 3]);
         $this->assertSame(6, $args['columns']);
         $this->assertSame(6, $args['posts_per_page']);
     }
 
     public function test_related_products_args_falls_back_to_default(): void {
         (new Dynamo_WooCommerce())->init();
-        $args = apply_filters('related_products_args', ['posts_per_page' => 3, 'columns' => 3]);
+        $args = apply_filters('woocommerce_output_related_products_args', ['posts_per_page' => 3, 'columns' => 3]);
         $this->assertSame(4, $args['columns']);
     }
 
     public function test_related_products_args_preserves_other_keys(): void {
         (new Dynamo_WooCommerce())->init();
-        $args = apply_filters('related_products_args', ['orderby' => 'rand', 'columns' => 3]);
+        $args = apply_filters('woocommerce_output_related_products_args', ['orderby' => 'rand', 'columns' => 3]);
         $this->assertSame('rand', $args['orderby']);
     }
 

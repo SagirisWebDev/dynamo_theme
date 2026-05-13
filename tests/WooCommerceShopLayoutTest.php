@@ -42,19 +42,19 @@ class WooCommerceShopLayoutTest extends TestCase {
         $this->assertSame('dynamo_woocommerce', $manager->sections['dynamo_woocommerce_shop_layout']['panel']);
     }
 
-    public function test_customizer_registers_shop_columns_setting_with_postmessage(): void {
+    public function test_customizer_registers_shop_columns_setting_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         $this->assertArrayHasKey('dynamo_woocommerce_shop_columns', $manager->settings);
-        $this->assertSame('postMessage', $manager->settings['dynamo_woocommerce_shop_columns']['transport']);
+        $this->assertSame('refresh', $manager->settings['dynamo_woocommerce_shop_columns']['transport']);
         $this->assertSame('3', $manager->settings['dynamo_woocommerce_shop_columns']['default']);
     }
 
-    public function test_customizer_registers_products_per_page_setting_with_postmessage(): void {
+    public function test_customizer_registers_products_per_page_setting_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         $this->assertArrayHasKey('dynamo_woocommerce_shop_products_per_page', $manager->settings);
-        $this->assertSame('postMessage', $manager->settings['dynamo_woocommerce_shop_products_per_page']['transport']);
+        $this->assertSame('refresh', $manager->settings['dynamo_woocommerce_shop_products_per_page']['transport']);
         $this->assertSame('12', $manager->settings['dynamo_woocommerce_shop_products_per_page']['default']);
     }
 

@@ -31,11 +31,11 @@ class WooCommerceQuantityButtonsTest extends TestCase {
         $this->assertSame('dynamo_woocommerce', $manager->sections['dynamo_woocommerce_quantity_buttons']['panel']);
     }
 
-    public function test_customizer_registers_toggle_setting_with_postmessage(): void {
+    public function test_customizer_registers_toggle_setting_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         $this->assertArrayHasKey('dynamo_woocommerce_quantity_buttons_enabled', $manager->settings);
-        $this->assertSame('postMessage', $manager->settings['dynamo_woocommerce_quantity_buttons_enabled']['transport']);
+        $this->assertSame('refresh', $manager->settings['dynamo_woocommerce_quantity_buttons_enabled']['transport']);
     }
 
     public function test_customizer_registers_toggle_as_checkbox(): void {

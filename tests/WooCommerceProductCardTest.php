@@ -47,13 +47,13 @@ class WooCommerceProductCardTest extends TestCase {
         $this->assertSame('dynamo_woocommerce', $manager->sections['dynamo_woocommerce_product_cards']['panel']);
     }
 
-    public function test_customizer_registers_all_six_card_settings_with_postmessage(): void {
+    public function test_customizer_registers_all_six_card_settings_with_refresh(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_WooCommerce())->register_customizer($manager);
         foreach (['image', 'title', 'price', 'rating', 'short-description', 'add-to-cart'] as $element) {
             $setting_id = 'dynamo_woocommerce_card_show_' . str_replace('-', '_', $element);
             $this->assertArrayHasKey($setting_id, $manager->settings, "Missing {$setting_id}");
-            $this->assertSame('postMessage', $manager->settings[$setting_id]['transport']);
+            $this->assertSame('refresh', $manager->settings[$setting_id]['transport']);
         }
     }
 

@@ -213,19 +213,6 @@
     font-weight: 600;
 }
 
-.dynamo-header-cart--left {
-    margin-right: auto;
-}
-
-.dynamo-header-cart--center {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.dynamo-header-cart--right {
-    margin-left: auto;
-}
-
 /* ---------- Shop Grid (issue #5) ---------- */
 
 .woocommerce ul.products,
@@ -236,11 +223,30 @@
     margin: 0;
     padding: 0;
     list-style: none;
+    padding-block: 1rem;
 }
 
+.woocommerce .related ul.products,
+.woocommerce-page .related ul.products {
+    grid-template-columns: repeat(var(--dynamo-woocommerce-single-related-columns, 4), 1fr);
+}
+
+.woocommerce ul.products::before,
+.woocommerce ul.products::after,
+.woocommerce-page ul.products::before,
+.woocommerce-page ul.products::after {
+    content: none;
+}
+
+/* The :is() block ties WooCommerce's (0,3,2) specificity for `.columns-N` width
+   rules in woocommerce-layout.css so our grid layout wins regardless of the
+   columns class WC stamps on ul.products. */
 .woocommerce ul.products li.product,
-.woocommerce-page ul.products li.product {
-    width: auto;
+.woocommerce-page ul.products li.product,
+:is(.woocommerce, .woocommerce-page) ul.products[class*="columns-"] li.product,
+:is(.woocommerce, .woocommerce-page)[class*="columns-"] ul.products li.product {
+    width: 100%;
+    max-width: 100%;
     margin: 0;
     padding: 1rem;
     float: none;
@@ -260,11 +266,18 @@
         grid-template-columns: repeat(min(2, var(--dynamo-woocommerce-shop-columns, 3)), 1fr);
         gap: 1rem;
     }
+
+    .woocommerce .related ul.products,
+    .woocommerce-page .related ul.products {
+        grid-template-columns: repeat(min(2, var(--dynamo-woocommerce-single-related-columns, 4)), 1fr);
+    }
 }
 
 @media (max-width: 480px) {
     .woocommerce ul.products,
-    .woocommerce-page ul.products {
+    .woocommerce-page ul.products,
+    .woocommerce .related ul.products,
+    .woocommerce-page .related ul.products {
         grid-template-columns: 1fr;
     }
 }

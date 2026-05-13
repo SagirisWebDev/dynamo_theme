@@ -52,12 +52,21 @@ class WooCommerceTokensTest extends TestCase {
         $this->assertStringContainsString('var(--dynamo-woocommerce-star-color)', $css);
     }
 
-    public function test_add_to_cart_button_rule_maps_to_colors_primary_token(): void {
+    public function test_add_to_cart_button_rule_maps_to_woocommerce_tokens(): void {
         $rules = (new Dynamo_CSS_Generator(new Dynamo_Token_Registry()))->generate_woocommerce_rules();
         $this->assertMatchesRegularExpression(
-            '/add_to_cart_button[^{]*\{[^}]*var\(--dynamo-colors-primary\)/s',
+            '/add_to_cart_button[^{]*\{[^}]*var\(--dynamo-woocommerce-add-to-cart-bg\)[^}]*var\(--dynamo-woocommerce-add-to-cart-color\)/s',
             $rules,
-            'add-to-cart button rule must use var(--dynamo-colors-primary)'
+            'add-to-cart button rule must use the WooCommerce add-to-cart bg/text tokens'
+        );
+    }
+
+    public function test_single_product_price_rule_maps_to_single_price_token(): void {
+        $rules = (new Dynamo_CSS_Generator(new Dynamo_Token_Registry()))->generate_woocommerce_rules();
+        $this->assertMatchesRegularExpression(
+            '/div\.product[^{]*\.price[^{]*\{[^}]*var\(--dynamo-woocommerce-single-price-color\)/s',
+            $rules,
+            'single product price rule must use var(--dynamo-woocommerce-single-price-color)'
         );
     }
 
