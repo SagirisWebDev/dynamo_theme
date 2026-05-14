@@ -32,4 +32,15 @@ class TokenRegistryTest extends TestCase {
         $registry = new Dynamo_Token_Registry();
         $this->assertArrayHasKey('colors-primary', $registry->all());
     }
+
+    public function test_typography_font_family_defaults_are_slug_references(): void {
+        $registry = new Dynamo_Token_Registry();
+        foreach (['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as $element) {
+            $this->assertSame(
+                'system-sans',
+                $registry->get("typography-{$element}-font-family"),
+                "Expected typography-{$element}-font-family default to be the 'system-sans' slug"
+            );
+        }
+    }
 }

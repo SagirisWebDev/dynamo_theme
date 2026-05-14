@@ -8,6 +8,7 @@ define('DAY_IN_SECONDS', 86400);
 
 $GLOBALS['wp_filter']             = [];
 $GLOBALS['wp_transients']         = [];
+$GLOBALS['wp_theme_mods']         = [];
 $GLOBALS['wp_theme_pages']        = [];
 $GLOBALS['wp_registered_settings'] = [];
 $GLOBALS['wp_enqueued_scripts']   = [];
@@ -94,6 +95,10 @@ function get_option(string $option, mixed $default = false): mixed {
     return $GLOBALS['wp_options'][$option] ?? $default;
 }
 
+function get_theme_mod(string $name, mixed $default = false): mixed {
+    return $GLOBALS['wp_theme_mods'][$name] ?? $default;
+}
+
 function update_option(string $option, mixed $value): bool {
     $GLOBALS['wp_options'][$option] = $value;
     return true;
@@ -160,6 +165,7 @@ class WP_Theme_JSON_Data {
 }
 
 require_once DYNAMO_PATH . 'includes/class-dynamo-token-registry.php';
+require_once DYNAMO_PATH . 'includes/class-dynamo-font-manifest.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-options.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-breadcrumbs.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-css-generator.php';

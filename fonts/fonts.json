@@ -1,0 +1,17 @@
+{
+    "system-sans": {
+        "label": "System Sans",
+        "fallback": "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+        "faces": []
+    },
+    "system-serif": {
+        "label": "System Serif",
+        "fallback": "Georgia, 'Times New Roman', Times, serif",
+        "faces": []
+    },
+    "system-mono": {
+        "label": "System Mono",
+        "fallback": "ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace",
+        "faces": []
+    }
+}

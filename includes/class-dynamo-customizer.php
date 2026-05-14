@@ -3,14 +3,16 @@ declare(strict_types=1);
 
 class Dynamo_Customizer {
 
-    private Dynamo_Token_Registry  $registry;                                                                   
-    private Dynamo_CSS_Cache $cache;                                                                             
-    private Dynamo_CSS_Generator $generator;   
+    private Dynamo_Token_Registry  $registry;
+    private Dynamo_CSS_Cache       $cache;
+    private Dynamo_CSS_Generator   $generator;
+    private Dynamo_Font_Manifest   $fonts;
 
-    public function __construct(Dynamo_Token_Registry $registry, Dynamo_CSS_Cache $cache, Dynamo_CSS_Generator $generator) {
+    public function __construct(Dynamo_Token_Registry $registry, Dynamo_CSS_Cache $cache, Dynamo_CSS_Generator $generator, Dynamo_Font_Manifest $fonts) {
         $this->registry  = $registry;
         $this->cache     = $cache;
         $this->generator = $generator;
+        $this->fonts     = $fonts;
     }
 
     public function init(): void {
@@ -89,10 +91,19 @@ class Dynamo_Customizer {
                 'panel' => 'dynamo_typography',
             ]);
 
+            $font_family_choices = $this->font_family_choices();
+            $fonts               = $this->fonts;
+            $sanitize_font_slug  = static function($value) use ($fonts): string {
+                $value = is_string($value) ? $value : '';
+                return $fonts->has($value) ? $value : 'system-sans';
+            };
+
             $controls = [
                 'font-family' => [
-                    'label' => __('Font Family', 'dynamo'),
-                    'type'  => 'text',
+                    'label'             => __('Font Family', 'dynamo'),
+                    'type'              => 'select',
+                    'choices'           => $font_family_choices,
+                    'sanitize_callback' => $sanitize_font_slug,
                 ],
                 'font-size' => [
                     'label' => __('Font Size', 'dynamo'),
@@ -115,7 +126,7 @@ class Dynamo_Customizer {
 
                 $wp_customize->add_setting($setting_id, [
                     'default'           => $this->registry->get($token) ?? '',
-                    'sanitize_callback' => 'sanitize_text_field',
+                    'sanitize_callback' => $control_args['sanitize_callback'] ?? 'sanitize_text_field',
                     'transport'         => 'postMessage',
                 ]);
 
@@ -244,6 +255,14 @@ class Dynamo_Customizer {
                 'type'    => 'text',
             ]));
         }
+    }
+
+    private function font_family_choices(): array {
+        $choices = [];
+        foreach ($this->fonts->all() as $slug => $entry) {
+            $choices[$slug] = (string) ($entry['label'] ?? $slug);
+        }
+        return $choices;
     }
 
     public function enqueue_preview_script(): void {

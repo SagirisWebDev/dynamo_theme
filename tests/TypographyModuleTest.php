@@ -9,12 +9,16 @@ class TypographyModuleTest extends TestCase {
         $GLOBALS['wp_filter'] = [];
     }
 
+    private function fixtureManifest(): Dynamo_Font_Manifest {
+        return new Dynamo_Font_Manifest(__DIR__ . '/fixtures/font-manifest/valid.json');
+    }
+
     private function makeGenerator(array $tokens = []): Dynamo_CSS_Generator {
         $registry = new Dynamo_Token_Registry();
         if (!empty($tokens)) {
             add_filter('dynamo_token_defaults', fn() => $tokens);
         }
-        return new Dynamo_CSS_Generator($registry);
+        return new Dynamo_CSS_Generator($registry, $this->fixtureManifest());
     }
 
     public function test_generate_contains_typography_body_font_family(): void {
@@ -29,32 +33,31 @@ class TypographyModuleTest extends TestCase {
 
     public function test_generate_with_known_typography_tokens_produces_expected_declarations(): void {
         $tokens = [
-            'typography-body-font-family' => 'Georgia, serif',
+            'typography-body-font-family' => 'inter',
             'typography-h1-font-size'     => '3rem',
         ];
         add_filter('dynamo_token_defaults', fn() => $tokens);
         $registry  = new Dynamo_Token_Registry();
-        $generator = new Dynamo_CSS_Generator($registry);
+        $generator = new Dynamo_CSS_Generator($registry, $this->fixtureManifest());
         $css = $generator->generate();
-        $this->assertStringContainsString('--dynamo-typography-body-font-family: Georgia, serif;', $css);
+        $this->assertStringContainsString('--dynamo-typography-body-font-family: "Inter", sans-serif;', $css);
         $this->assertStringContainsString('--dynamo-typography-h1-font-size: 3rem;', $css);
     }
 
     public function test_generate_with_empty_token_set_returns_empty_string(): void {
-        $css = $this->makeGenerator([])->generate();
-        // With no tokens, generator should not emit `:root {}` empty block.
-        // (makeGenerator with empty array skips the filter, so defaults still apply —
-        //  use an explicit non-typography/non-color token set to produce empty modules)
         add_filter('dynamo_token_defaults', fn() => []);
         $registry  = new Dynamo_Token_Registry();
-        $generator = new Dynamo_CSS_Generator($registry);
+        $generator = new Dynamo_CSS_Generator($registry, $this->fixtureManifest());
         $css = $generator->generate();
         $this->assertSame('', $css);
     }
 
     public function test_customizer_register_adds_typography_panel_and_controls(): void {
+        $registry   = new Dynamo_Token_Registry();
+        $fonts      = $this->fixtureManifest();
+        $generator  = new Dynamo_CSS_Generator($registry, $fonts);
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = new Dynamo_Customizer($registry, new Dynamo_CSS_Cache(), $generator, $fonts);
         $customizer->register($manager);
 
         $this->assertArrayHasKey('dynamo_typography', $manager->panels);

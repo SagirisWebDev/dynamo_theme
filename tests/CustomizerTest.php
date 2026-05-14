@@ -36,8 +36,16 @@ class CustomizerTest extends TestCase {
         $GLOBALS['wp_transients']['dynamo_css_' . DYNAMO_VERSION] = 'cached';
     }
 
+    private function fixtureManifest(): Dynamo_Font_Manifest {
+        return new Dynamo_Font_Manifest(__DIR__ . '/fixtures/font-manifest/valid.json');
+    }
+
     private function makeCustomizer(): Dynamo_Customizer {
-        return new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $registry  = new Dynamo_Token_Registry();
+        $fonts     = $this->fixtureManifest();
+        $generator = new Dynamo_CSS_Generator($registry, $fonts);
+        $cache     = new Dynamo_CSS_Cache();
+        return new Dynamo_Customizer($registry, $cache, $generator, $fonts);
     }
 
     public function test_init_registers_customize_register_hook(): void {
@@ -78,9 +86,9 @@ class CustomizerTest extends TestCase {
     }
 
     public function test_register_setting_default_matches_token_registry(): void {
+        $manager = new FakeCustomizeManager();
+        $this->makeCustomizer()->register($manager);
         $registry = new Dynamo_Token_Registry();
-        $manager  = new FakeCustomizeManager();
-        (new Dynamo_Customizer($registry))->register($manager);
         $this->assertSame(
             $registry->get('colors-primary'),
             $manager->settings['dynamo_colors_primary']['default']
@@ -105,5 +113,39 @@ class CustomizerTest extends TestCase {
         $this->makeCustomizer()->register($manager);
         $this->assertArrayHasKey('dynamo_colours_section', $manager->sections);
         $this->assertSame('dynamo_colours', $manager->sections['dynamo_colours_section']['panel']);
+    }
+
+    public function test_typography_font_family_control_is_a_select(): void {
+        $manager = new FakeCustomizeManager();
+        $this->makeCustomizer()->register($manager);
+        $control = $this->findControl($manager, 'dynamo_typography_body_font_family');
+        $this->assertNotNull($control, 'Expected body font-family control to be registered');
+        $this->assertSame('select', $control->args['type']);
+    }
+
+    public function test_typography_font_family_control_choices_come_from_manifest(): void {
+        $manager = new FakeCustomizeManager();
+        $this->makeCustomizer()->register($manager);
+        $control = $this->findControl($manager, 'dynamo_typography_body_font_family');
+        $this->assertArrayHasKey('system-sans', $control->args['choices']);
+        $this->assertArrayHasKey('inter', $control->args['choices']);
+        $this->assertSame('System Sans', $control->args['choices']['system-sans']);
+    }
+
+    public function test_typography_font_family_sanitize_callback_rejects_unknown_slugs(): void {
+        $manager = new FakeCustomizeManager();
+        $this->makeCustomizer()->register($manager);
+        $sanitize = $manager->settings['dynamo_typography_body_font_family']['sanitize_callback'];
+        $this->assertSame('inter', $sanitize('inter'));
+        $this->assertSame('system-sans', $sanitize('does-not-exist'));
+    }
+
+    private function findControl(FakeCustomizeManager $manager, string $id): ?object {
+        foreach ($manager->controls as $control) {
+            if ($control->id === $id) {
+                return $control;
+            }
+        }
+        return null;
     }
 }
