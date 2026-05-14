@@ -122,3 +122,18 @@ add_action( 'wp_enqueue_scripts', function() {
 function dynamo_bust_css_cache(): void {
     (new Dynamo_CSS_Cache())->bust();
 }
+
+dynamo_config_customizer([
+    'id'       => 'sidebar_layout',
+    'type'     => 'radio',
+    'label'    => 'Sidebar layout',
+    'section'  => 'layout',
+    'selector' => '.site-main',
+    'property' => 'grid-template-columns',
+    'requires' => ['display' => 'grid'],
+    'choices'  => [
+        'left'  => ['label' => 'Left',  'value' => '300px 1fr'],
+        'right' => ['label' => 'Right', 'value' => '1fr 300px'],
+        'none'  => ['label' => 'None',  'value' => '1fr'],
+    ],
+]);

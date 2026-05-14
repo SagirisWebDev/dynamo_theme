@@ -72,6 +72,7 @@ class BindingRegistryTest extends TestCase {
             'section'  => 'layout',
             'selector' => '.site-content',
             'property' => 'grid-template-columns',
+            'requires' => ['display' => 'grid'],
             'choices'  => [
                 'left'  => ['label' => 'Left',  'value' => '300px 1fr'],
                 'right' => ['label' => 'Right', 'value' => '1fr 300px'],
@@ -125,5 +126,62 @@ class BindingRegistryTest extends TestCase {
         $registry = new Dynamo_Binding_Registry();
         $registry->register($this->validRadioArgs(['sanitize_callback' => $custom]));
         $this->assertSame($custom, $registry->all()['sidebar_layout']['sanitize_callback']);
+    }
+
+    public function test_register_stores_requires_field_on_binding(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register($this->validRadioArgs());
+        $this->assertSame(
+            ['display' => 'grid'],
+            $registry->all()['sidebar_layout']['requires']
+        );
+    }
+
+    public function test_two_bindings_same_selector_same_requires_both_register(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register($this->validRadioArgs());
+        $registry->register($this->validRadioArgs([
+            'id'       => 'sidebar_rows',
+            'property' => 'grid-template-rows',
+            'choices'  => ['single' => ['label' => 'Single', 'value' => 'auto']],
+        ]));
+        $this->assertCount(2, $registry->all());
+    }
+
+    public function test_two_bindings_same_selector_conflicting_requires_throws(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register($this->validRadioArgs());
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/conflicting requires|display: grid|display: flex/i');
+        $registry->register([
+            'id'       => 'sidebar_flex',
+            'type'     => 'radio',
+            'label'    => 'Sidebar flex',
+            'section'  => 'layout',
+            'selector' => '.site-content',
+            'property' => 'flex-direction',
+            'requires' => ['display' => 'flex'],
+            'choices'  => [
+                'row' => ['label' => 'Row', 'value' => 'row'],
+                'col' => ['label' => 'Col', 'value' => 'column'],
+            ],
+        ]);
+    }
+
+    public function test_two_bindings_different_selectors_conflicting_requires_both_register(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register($this->validRadioArgs());
+        $registry->register($this->validRadioArgs([
+            'id'       => 'sidebar_flex',
+            'selector' => '.other-content',
+            'property' => 'flex-direction',
+            'requires' => ['display' => 'flex'],
+            'choices'  => [
+                'row' => ['label' => 'Row', 'value' => 'row'],
+                'col' => ['label' => 'Col', 'value' => 'column'],
+            ],
+        ]));
+        $this->assertCount(2, $registry->all());
     }
 }

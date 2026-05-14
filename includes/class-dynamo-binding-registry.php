@@ -36,7 +36,29 @@ class Dynamo_Binding_Registry {
             throw new InvalidArgumentException("Duplicate Binding id: {$id}");
         }
 
+        $this->detect_requires_conflict($args);
+
         $this->bindings[$id] = $this->normalize($args);
+    }
+
+    private function detect_requires_conflict(array $args): void {
+        if (empty($args['requires']) || !is_array($args['requires'])) {
+            return;
+        }
+        $selector = $args['selector'];
+        foreach ($this->bindings as $existing) {
+            if ($existing['selector'] !== $selector || empty($existing['requires'])) {
+                continue;
+            }
+            foreach ($args['requires'] as $prop => $value) {
+                if (isset($existing['requires'][$prop]) && $existing['requires'][$prop] !== $value) {
+                    throw new InvalidArgumentException(
+                        "Conflicting requires on selector '{$selector}': binding '{$args['id']}' wants `{$prop}: {$value}`, "
+                        . "but binding '{$existing['id']}' already requires `{$prop}: {$existing['requires'][$prop]}`."
+                    );
+                }
+            }
+        }
     }
 
     public function all(): array {

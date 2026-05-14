@@ -304,6 +304,7 @@ class BindingEndToEndTest extends TestCase {
             'section'  => 'layout',
             'selector' => '.site-content',
             'property' => 'grid-template-columns',
+            'requires' => ['display' => 'grid'],
             'choices'  => [
                 'left'  => ['label' => 'Left',  'value' => '300px 1fr'],
                 'right' => ['label' => 'Right', 'value' => '1fr 300px'],
@@ -374,5 +375,60 @@ class BindingEndToEndTest extends TestCase {
             'property' => 'grid-template-columns',
             'choices'  => ['left' => 'Left', 'right' => 'Right'],
         ]);
+    }
+
+    public function test_grid_binding_without_requires_throws_through_global_function(): void {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/display: grid/i');
+        dynamo_config_customizer([
+            'id'       => 'broken_grid',
+            'type'     => 'radio',
+            'label'    => 'Broken',
+            'section'  => 'layout',
+            'selector' => '.site-content',
+            'property' => 'grid-template-columns',
+            'choices'  => [
+                'left' => ['label' => 'Left', 'value' => '300px 1fr'],
+            ],
+        ]);
+    }
+
+    public function test_parent_prereq_property_throws_through_global_function(): void {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/parent/i');
+        dynamo_config_customizer([
+            'id'       => 'card_span',
+            'type'     => 'select',
+            'label'    => 'Card span',
+            'section'  => 'layout',
+            'selector' => '.card',
+            'property' => 'grid-column',
+            'choices'  => [
+                'half' => ['label' => 'Half', 'value' => 'span 2'],
+            ],
+        ]);
+    }
+
+    public function test_full_requires_path_emits_prereq_rule_and_var_rule(): void {
+        dynamo_config_customizer([
+            'id'       => 'sidebar_layout',
+            'type'     => 'radio',
+            'label'    => 'Sidebar layout',
+            'section'  => 'layout',
+            'selector' => '.site-content',
+            'property' => 'grid-template-columns',
+            'requires' => ['display' => 'grid'],
+            'choices'  => [
+                'left' => ['label' => 'Left', 'value' => '300px 1fr'],
+                'full' => ['label' => 'Full', 'value' => '1fr'],
+            ],
+        ]);
+
+        $css = (new Dynamo_Binding_CSS_Renderer(Dynamo_Binding_Registry::instance()))->render();
+        $prereq = strpos($css, '.site-content { display: grid; }');
+        $var    = strpos($css, '.site-content { grid-template-columns: var(--dynamo-sidebar_layout); }');
+        $this->assertNotFalse($prereq);
+        $this->assertNotFalse($var);
+        $this->assertLessThan($var, $prereq);
     }
 }

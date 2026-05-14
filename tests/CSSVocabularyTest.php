@@ -140,4 +140,65 @@ class CSSVocabularyTest extends TestCase {
         });
         $this->assertSame(['keyword'], Dynamo_CSS_Vocabulary::type_categories('custom-type'));
     }
+
+    public function test_property_requirement_for_grid_template_columns_is_display_grid(): void {
+        $this->assertSame(
+            ['display' => 'grid'],
+            Dynamo_CSS_Vocabulary::property_requirement('grid-template-columns')
+        );
+    }
+
+    public function test_property_requirement_for_grid_template_rows_is_display_grid(): void {
+        $this->assertSame(['display' => 'grid'], Dynamo_CSS_Vocabulary::property_requirement('grid-template-rows'));
+    }
+
+    public function test_property_requirement_for_grid_gap_props_is_display_grid(): void {
+        $this->assertSame(['display' => 'grid'], Dynamo_CSS_Vocabulary::property_requirement('row-gap'));
+        $this->assertSame(['display' => 'grid'], Dynamo_CSS_Vocabulary::property_requirement('column-gap'));
+        $this->assertSame(['display' => 'grid'], Dynamo_CSS_Vocabulary::property_requirement('gap'));
+    }
+
+    public function test_property_requirement_for_flex_direction_is_display_flex(): void {
+        $this->assertSame(['display' => 'flex'], Dynamo_CSS_Vocabulary::property_requirement('flex-direction'));
+    }
+
+    public function test_property_requirement_for_align_items_is_display_flex(): void {
+        $this->assertSame(['display' => 'flex'], Dynamo_CSS_Vocabulary::property_requirement('align-items'));
+    }
+
+    public function test_property_requirement_for_top_is_position_relative(): void {
+        $this->assertSame(['position' => 'relative'], Dynamo_CSS_Vocabulary::property_requirement('top'));
+    }
+
+    public function test_property_requirement_for_z_index_is_position_relative(): void {
+        $this->assertSame(['position' => 'relative'], Dynamo_CSS_Vocabulary::property_requirement('z-index'));
+    }
+
+    public function test_property_requirement_for_property_without_prereq_returns_null(): void {
+        $this->assertNull(Dynamo_CSS_Vocabulary::property_requirement('background-color'));
+        $this->assertNull(Dynamo_CSS_Vocabulary::property_requirement('font-family'));
+        $this->assertNull(Dynamo_CSS_Vocabulary::property_requirement('opacity'));
+    }
+
+    public function test_grid_column_is_parent_prereq_property(): void {
+        $this->assertTrue(Dynamo_CSS_Vocabulary::has_parent_requirement('grid-column'));
+        $this->assertTrue(Dynamo_CSS_Vocabulary::has_parent_requirement('grid-area'));
+        $this->assertTrue(Dynamo_CSS_Vocabulary::has_parent_requirement('align-self'));
+        $this->assertTrue(Dynamo_CSS_Vocabulary::has_parent_requirement('flex-grow'));
+        $this->assertTrue(Dynamo_CSS_Vocabulary::has_parent_requirement('order'));
+    }
+
+    public function test_non_parent_prereq_property_is_not_flagged(): void {
+        $this->assertFalse(Dynamo_CSS_Vocabulary::has_parent_requirement('grid-template-columns'));
+        $this->assertFalse(Dynamo_CSS_Vocabulary::has_parent_requirement('background-color'));
+        $this->assertFalse(Dynamo_CSS_Vocabulary::has_parent_requirement('top'));
+    }
+
+    public function test_dynamo_binding_requirements_filter_extends_map(): void {
+        add_filter('dynamo_binding_requirements', function(array $map): array {
+            $map['my-custom-prop'] = ['display' => 'grid'];
+            return $map;
+        });
+        $this->assertSame(['display' => 'grid'], Dynamo_CSS_Vocabulary::property_requirement('my-custom-prop'));
+    }
 }

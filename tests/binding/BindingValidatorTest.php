@@ -222,6 +222,7 @@ class BindingValidatorTest extends TestCase {
             'section'  => 'layout',
             'selector' => '.site-content',
             'property' => 'grid-template-columns',
+            'requires' => ['display' => 'grid'],
             'choices'  => [
                 'left'  => ['label' => 'Left',  'value' => '300px 1fr'],
                 'right' => ['label' => 'Right', 'value' => '1fr 300px'],
@@ -304,5 +305,103 @@ class BindingValidatorTest extends TestCase {
         $this->assertNotEmpty($errors);
         $msg = strtolower(implode(' ', $errors));
         $this->assertStringContainsString('default', $msg);
+    }
+
+    public function test_grid_template_columns_without_requires_is_reported(): void {
+        // Bare radio binding against grid-template-columns omitting `requires`.
+        $args = $this->validRadioArgs();
+        unset($args['requires']);
+        $errors = (new Dynamo_Binding_Validator())->validate($args);
+        $this->assertNotEmpty($errors);
+        $msg = strtolower(implode(' ', $errors));
+        $this->assertStringContainsString('display: grid', $msg);
+        $this->assertStringContainsString("'requires'", $msg);
+    }
+
+    public function test_grid_template_columns_with_correct_requires_is_valid(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validRadioArgs([
+            'requires' => ['display' => 'grid'],
+        ]));
+        $this->assertSame([], $errors);
+    }
+
+    public function test_grid_template_columns_with_mismatched_requires_is_reported(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validRadioArgs([
+            'requires' => ['display' => 'flex'],
+        ]));
+        $msg = strtolower(implode(' ', $errors));
+        $this->assertStringContainsString('requires', $msg);
+        $this->assertStringContainsString('grid', $msg);
+    }
+
+    public function test_grid_template_columns_with_requires_wrong_property_is_reported(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validRadioArgs([
+            'requires' => ['position' => 'relative'],
+        ]));
+        $this->assertStringContainsString('display', strtolower(implode(' ', $errors)));
+    }
+
+    public function test_top_position_relative_requires_is_valid(): void {
+        $args = $this->validTextArgs([
+            'id'       => 'header_offset',
+            'type'     => 'number',
+            'selector' => '.site-header',
+            'property' => 'top',
+            'unit'     => 'px',
+            'requires' => ['position' => 'relative'],
+        ]);
+        $errors = (new Dynamo_Binding_Validator())->validate($args);
+        $this->assertSame([], $errors);
+    }
+
+    public function test_top_without_requires_is_reported(): void {
+        $args = $this->validTextArgs([
+            'id'       => 'header_offset',
+            'type'     => 'number',
+            'selector' => '.site-header',
+            'property' => 'top',
+            'unit'     => 'px',
+        ]);
+        $errors = (new Dynamo_Binding_Validator())->validate($args);
+        $msg = strtolower(implode(' ', $errors));
+        $this->assertStringContainsString('position: relative', $msg);
+    }
+
+    public function test_property_without_requirement_does_not_need_requires_field(): void {
+        // background-color has no requirement — validator must not complain.
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validColorArgs());
+        $this->assertSame([], $errors);
+    }
+
+    public function test_parent_requirement_property_grid_column_is_reported_as_unsupported(): void {
+        $args = $this->validRadioArgs([
+            'id'       => 'card_span',
+            'selector' => '.card',
+            'property' => 'grid-column',
+            'choices'  => [
+                'half' => ['label' => 'Half', 'value' => 'span 2'],
+                'full' => ['label' => 'Full', 'value' => '1 / -1'],
+            ],
+        ]);
+        $errors = (new Dynamo_Binding_Validator())->validate($args);
+        $this->assertNotEmpty($errors);
+        $msg = strtolower(implode(' ', $errors));
+        $this->assertStringContainsString('parent', $msg);
+        $this->assertStringContainsString('not handled automatically', $msg);
+    }
+
+    public function test_parent_requirement_property_align_self_is_reported_as_unsupported(): void {
+        $args = $this->validRadioArgs([
+            'id'       => 'card_align',
+            'selector' => '.card',
+            'property' => 'align-self',
+            'choices'  => [
+                'start' => ['label' => 'Start', 'value' => 'start'],
+                'end'   => ['label' => 'End',   'value' => 'end'],
+            ],
+        ]);
+        $errors = (new Dynamo_Binding_Validator())->validate($args);
+        $msg = strtolower(implode(' ', $errors));
+        $this->assertStringContainsString('parent', $msg);
     }
 }

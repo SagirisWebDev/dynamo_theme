@@ -17,6 +17,15 @@ class Dynamo_CSS_Vocabulary {
         return in_array($unit, self::unit_list(), true);
     }
 
+    public static function property_requirement(string $property): ?array {
+        $map = self::requirement_map();
+        return $map[$property] ?? null;
+    }
+
+    public static function has_parent_requirement(string $property): bool {
+        return in_array($property, self::parent_requirement_list(), true);
+    }
+
     public static function default_sanitizer(string $type): callable|string|null {
         $map = [
             'color'    => 'sanitize_hex_color',
@@ -159,6 +168,41 @@ class Dynamo_CSS_Vocabulary {
             $map[$p] = ['any'];
         }
         return apply_filters('dynamo_binding_properties', $map);
+    }
+
+    private static function requirement_map(): array {
+        $grid_container_props = [
+            'grid-template-columns', 'grid-template-rows', 'grid-template-areas',
+            'grid-auto-flow', 'grid-auto-columns', 'grid-auto-rows',
+            'gap', 'row-gap', 'column-gap',
+        ];
+        $flex_container_props = [
+            'flex-direction', 'flex-wrap',
+            'justify-content', 'align-items', 'align-content',
+        ];
+        $positioned_props = [
+            'top', 'right', 'bottom', 'left', 'inset', 'z-index',
+        ];
+
+        $map = [];
+        foreach ($grid_container_props as $p) {
+            $map[$p] = ['display' => 'grid'];
+        }
+        foreach ($flex_container_props as $p) {
+            $map[$p] = ['display' => 'flex'];
+        }
+        foreach ($positioned_props as $p) {
+            $map[$p] = ['position' => 'relative'];
+        }
+        return apply_filters('dynamo_binding_requirements', $map);
+    }
+
+    private static function parent_requirement_list(): array {
+        return apply_filters('dynamo_binding_parent_requirements', [
+            'grid-column', 'grid-row', 'grid-area',
+            'align-self', 'justify-self',
+            'flex-grow', 'flex-shrink', 'order',
+        ]);
     }
 
     private static function unit_list(): array {

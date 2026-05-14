@@ -243,6 +243,7 @@ class BindingAdapterTest extends TestCase {
             'section'  => 'layout',
             'selector' => '.site-content',
             'property' => 'grid-template-columns',
+            'requires' => ['display' => 'grid'],
             'choices'  => [
                 'left'  => ['label' => 'Left',  'value' => '300px 1fr'],
                 'right' => ['label' => 'Right', 'value' => '1fr 300px'],

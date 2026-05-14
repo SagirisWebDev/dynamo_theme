@@ -112,6 +112,7 @@ class BindingCSSRendererTest extends TestCase {
             'section'  => 'layout',
             'selector' => '.site-content',
             'property' => 'grid-template-columns',
+            'requires' => ['display' => 'grid'],
             'choices'  => [
                 'left'  => ['label' => 'Left',  'value' => '300px 1fr'],
                 'right' => ['label' => 'Right', 'value' => '1fr 300px'],
@@ -149,6 +150,60 @@ class BindingCSSRendererTest extends TestCase {
     public function test_radio_rule_layer_uses_var_reference_not_resolved_value(): void {
         $css = (new Dynamo_Binding_CSS_Renderer($this->radioRegistry()))->render();
         $this->assertStringContainsString('.site-content { grid-template-columns: var(--dynamo-sidebar_layout); }', $css);
+    }
+
+    public function test_requires_emits_prereq_rule_on_same_selector(): void {
+        $css = (new Dynamo_Binding_CSS_Renderer($this->radioRegistry()))->render();
+        $this->assertStringContainsString('.site-content { display: grid; }', $css);
+    }
+
+    public function test_requires_prereq_rule_appears_before_var_rule(): void {
+        $css      = (new Dynamo_Binding_CSS_Renderer($this->radioRegistry()))->render();
+        $prereq   = strpos($css, '.site-content { display: grid; }');
+        $var_rule = strpos($css, '.site-content { grid-template-columns: var(--dynamo-sidebar_layout); }');
+        $this->assertNotFalse($prereq);
+        $this->assertNotFalse($var_rule);
+        $this->assertLessThan($var_rule, $prereq);
+    }
+
+    public function test_two_bindings_on_same_selector_with_same_requires_emit_prereq_once(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'sidebar_layout',
+            'type'     => 'radio',
+            'label'    => 'Sidebar layout',
+            'section'  => 'layout',
+            'selector' => '.site-content',
+            'property' => 'grid-template-columns',
+            'requires' => ['display' => 'grid'],
+            'choices'  => [
+                'left' => ['label' => 'Left', 'value' => '300px 1fr'],
+            ],
+        ]);
+        $registry->register([
+            'id'       => 'sidebar_rows',
+            'type'     => 'radio',
+            'label'    => 'Sidebar rows',
+            'section'  => 'layout',
+            'selector' => '.site-content',
+            'property' => 'grid-template-rows',
+            'requires' => ['display' => 'grid'],
+            'choices'  => [
+                'single' => ['label' => 'Single', 'value' => 'auto'],
+            ],
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertSame(
+            1,
+            substr_count($css, '.site-content { display: grid; }'),
+            'expected display: grid emitted exactly once for two bindings on the same selector'
+        );
+    }
+
+    public function test_property_without_requirement_does_not_emit_extra_rule(): void {
+        $css = (new Dynamo_Binding_CSS_Renderer($this->colorRegistry()))->render();
+        $this->assertStringNotContainsString('display:', $css);
+        $this->assertStringNotContainsString('position:', $css);
     }
 
     public function test_multiple_bindings_each_emit_both_layers(): void {

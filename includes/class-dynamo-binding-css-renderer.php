@@ -19,8 +19,19 @@ class Dynamo_Binding_CSS_Renderer {
     }
 
     public function rule_lines(): array {
-        $lines = [];
+        $lines    = [];
+        $emitted  = [];
         foreach ($this->registry->all() as $binding) {
+            if (!empty($binding['requires']) && is_array($binding['requires'])) {
+                foreach ($binding['requires'] as $req_prop => $req_value) {
+                    $signature = $binding['selector'] . '|' . $req_prop . ':' . $req_value;
+                    if (isset($emitted[$signature])) {
+                        continue;
+                    }
+                    $emitted[$signature] = true;
+                    $lines[] = "{$binding['selector']} { {$req_prop}: {$req_value}; }";
+                }
+            }
             $lines[] = "{$binding['selector']} { {$binding['property']}: var(--dynamo-{$binding['id']}); }";
         }
         return $lines;

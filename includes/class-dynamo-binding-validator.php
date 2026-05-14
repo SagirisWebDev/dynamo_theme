@@ -36,7 +36,7 @@ class Dynamo_Binding_Validator {
 
         if (null !== $property) {
             $property_categories = Dynamo_CSS_Vocabulary::property_categories($property);
-            if (empty($property_categories)) {
+            if (empty($property_categories) && !Dynamo_CSS_Vocabulary::has_parent_requirement($property)) {
                 $errors[] = "Unknown property: {$property}";
             }
         } else {
@@ -60,7 +60,48 @@ class Dynamo_Binding_Validator {
             $errors = [...$errors, ...$this->validate_choices($args)];
         }
 
+        if (null !== $property) {
+            $errors = [...$errors, ...$this->validate_requirements($args, $property)];
+        }
+
         return $errors;
+    }
+
+    private function validate_requirements(array $args, string $property): array {
+        if (Dynamo_CSS_Vocabulary::has_parent_requirement($property)) {
+            return [
+                "Property '{$property}' requires a declaration on the parent selector — not handled automatically by dynamo_config_customizer. Configure the parent's display/position in your theme CSS, then drop the parent-only property from this binding.",
+            ];
+        }
+
+        $required = Dynamo_CSS_Vocabulary::property_requirement($property);
+        if (null === $required) {
+            return [];
+        }
+
+        $selector = $args['selector'] ?? '';
+        [$req_prop, $req_value] = [array_key_first($required), reset($required)];
+        $supplied = $args['requires'] ?? null;
+
+        if (null === $supplied) {
+            return [
+                "Property '{$property}' requires `{$req_prop}: {$req_value}` on `{$selector}`. Either set this in your theme CSS, or pass 'requires' => ['{$req_prop}' => '{$req_value}'] to have the binding emit it.",
+            ];
+        }
+
+        if (!is_array($supplied) || !array_key_exists($req_prop, $supplied)) {
+            return [
+                "Property '{$property}' requires `{$req_prop}: {$req_value}`, but 'requires' does not declare '{$req_prop}'.",
+            ];
+        }
+
+        if ($supplied[$req_prop] !== $req_value) {
+            return [
+                "Property '{$property}' requires `{$req_prop}: {$req_value}`, but 'requires' declares `{$req_prop}: {$supplied[$req_prop]}`.",
+            ];
+        }
+
+        return [];
     }
 
     private function validate_choices(array $args): array {
