@@ -284,6 +284,94 @@ class BindingAdapterTest extends TestCase {
         $this->assertSame('left', $manager->settings['dynamo_sidebar_layout']['default']);
     }
 
+    private function imageRegistry(array $overrides = []): Dynamo_Binding_Registry {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register(array_merge([
+            'id'       => 'logo_image',
+            'type'     => 'image',
+            'label'    => 'Logo image',
+            'section'  => 'branding',
+            'selector' => '.site-logo',
+            'property' => 'background-image',
+        ], $overrides));
+        return $registry;
+    }
+
+    public function test_url_binding_creates_generic_control_with_type_url(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry(['type' => 'url'])))->apply($manager);
+        $this->assertInstanceOf(WP_Customize_Control::class, $manager->controls[0]);
+        $this->assertSame('url', $manager->controls[0]->args['type']);
+    }
+
+    public function test_url_binding_default_sanitizer_is_esc_url_raw(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry(['type' => 'url'])))->apply($manager);
+        $this->assertSame('esc_url_raw', $manager->settings['dynamo_logo_image']['sanitize_callback']);
+    }
+
+    public function test_image_binding_uses_image_control_class(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry()))->apply($manager);
+        $this->assertInstanceOf(WP_Customize_Image_Control::class, $manager->controls[0]);
+        $this->assertSame('esc_url_raw', $manager->settings['dynamo_logo_image']['sanitize_callback']);
+    }
+
+    public function test_media_binding_uses_media_control_class(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry(['type' => 'media'])))->apply($manager);
+        $this->assertInstanceOf(WP_Customize_Media_Control::class, $manager->controls[0]);
+    }
+
+    public function test_media_binding_default_sanitizer_is_absint_callable(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry(['type' => 'media'])))->apply($manager);
+        $sanitize = $manager->settings['dynamo_logo_image']['sanitize_callback'];
+        $this->assertIsCallable($sanitize);
+        $this->assertSame(42, $sanitize('42'));
+        // Must accept WP's two-arg call without throwing.
+        $this->assertSame(7, $sanitize(7, new stdClass()));
+    }
+
+    public function test_url_default_is_empty_string(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry(['type' => 'url'])))->apply($manager);
+        $this->assertSame('', $manager->settings['dynamo_logo_image']['default']);
+    }
+
+    public function test_image_default_is_empty_string(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry()))->apply($manager);
+        $this->assertSame('', $manager->settings['dynamo_logo_image']['default']);
+    }
+
+    public function test_media_default_is_zero(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry(['type' => 'media'])))->apply($manager);
+        $this->assertSame(0, $manager->settings['dynamo_logo_image']['default']);
+    }
+
+    public function test_mime_type_passes_through_to_image_control(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry(['mime_type' => 'image'])))->apply($manager);
+        $this->assertSame('image', $manager->controls[0]->args['mime_type']);
+    }
+
+    public function test_mime_type_passes_through_to_media_control(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry([
+            'type'      => 'media',
+            'mime_type' => 'video',
+        ])))->apply($manager);
+        $this->assertSame('video', $manager->controls[0]->args['mime_type']);
+    }
+
+    public function test_mime_type_omitted_is_absent_from_control_args(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->imageRegistry()))->apply($manager);
+        $this->assertArrayNotHasKey('mime_type', $manager->controls[0]->args);
+    }
+
     public function test_radio_sanitizer_through_adapter_is_callable_whitelist(): void {
         $manager = new FakeCustomizeManager();
         (new Dynamo_Customizer_Binding_Adapter($this->radioRegistry()))->apply($manager);

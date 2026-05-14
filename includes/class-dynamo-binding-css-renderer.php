@@ -54,10 +54,33 @@ class Dynamo_Binding_CSS_Renderer {
         } else {
             $value = (string) $binding['default'];
         }
+        $type = $binding['type'] ?? '';
+        if ('media' === $type) {
+            $value = self::resolve_attachment($value);
+        }
+        if (in_array($type, ['url', 'image', 'media'], true) && '' !== $value) {
+            $value = self::wrap_url($value);
+        }
         if (!empty($binding['choices']) && is_array($binding['choices'])) {
             $value = self::resolve_choice($value, $binding);
         }
         return self::apply_unit($value, $binding);
+    }
+
+    private static function wrap_url(string $value): string {
+        if (str_starts_with($value, 'url(')) {
+            return $value;
+        }
+        return "url('{$value}')";
+    }
+
+    private static function resolve_attachment(string $value): string {
+        $id = (int) $value;
+        if ($id <= 0) {
+            return '';
+        }
+        $url = wp_get_attachment_url($id);
+        return false === $url ? '' : (string) $url;
     }
 
     private static function resolve_choice(string $slug, array $binding): string {

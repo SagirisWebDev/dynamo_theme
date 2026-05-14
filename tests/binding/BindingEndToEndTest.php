@@ -409,6 +409,73 @@ class BindingEndToEndTest extends TestCase {
         ]);
     }
 
+    public function test_url_binding_full_path(): void {
+        dynamo_config_customizer([
+            'id'       => 'cta_url',
+            'type'     => 'url',
+            'label'    => 'CTA URL',
+            'section'  => 'cta',
+            'selector' => '.cta',
+            'property' => 'background-image',
+            'default'  => 'http://localhost/cta.png',
+        ]);
+
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter(Dynamo_Binding_Registry::instance()))
+            ->apply($manager);
+        $this->assertSame('url', $manager->controls[0]->args['type']);
+        $this->assertSame('esc_url_raw', $manager->settings['dynamo_cta_url']['sanitize_callback']);
+
+        $css = (new Dynamo_Binding_CSS_Renderer(Dynamo_Binding_Registry::instance()))->render();
+        $this->assertStringContainsString("--dynamo-cta_url: url('http://localhost/cta.png');", $css);
+    }
+
+    public function test_image_binding_full_path_uses_image_control_class(): void {
+        dynamo_config_customizer([
+            'id'       => 'logo_image',
+            'type'      => 'image',
+            'label'     => 'Logo image',
+            'section'   => 'branding',
+            'selector'  => '.site-logo',
+            'property'  => 'background-image',
+            'mime_type' => 'image',
+        ]);
+
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter(Dynamo_Binding_Registry::instance()))
+            ->apply($manager);
+        $this->assertInstanceOf(WP_Customize_Image_Control::class, $manager->controls[0]);
+        $this->assertSame('image', $manager->controls[0]->args['mime_type']);
+    }
+
+    public function test_media_binding_full_path_resolves_attachment_id_to_url(): void {
+        $GLOBALS['wp_attachment_urls'] = [99 => 'http://localhost/uploads/hero.jpg'];
+        set_theme_mod('dynamo_hero_bg', 99);
+
+        dynamo_config_customizer([
+            'id'       => 'hero_bg',
+            'type'     => 'media',
+            'label'    => 'Hero background',
+            'section'  => 'hero',
+            'selector' => '.hero',
+            'property' => 'background-image',
+        ]);
+
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter(Dynamo_Binding_Registry::instance()))
+            ->apply($manager);
+        $this->assertInstanceOf(WP_Customize_Media_Control::class, $manager->controls[0]);
+        $this->assertSame(0, $manager->settings['dynamo_hero_bg']['default']);
+
+        $sanitize = $manager->settings['dynamo_hero_bg']['sanitize_callback'];
+        $this->assertIsCallable($sanitize);
+        $this->assertSame(99, $sanitize('99', new stdClass()));
+
+        $css = (new Dynamo_Binding_CSS_Renderer(Dynamo_Binding_Registry::instance()))->render();
+        $this->assertStringContainsString("--dynamo-hero_bg: url('http://localhost/uploads/hero.jpg');", $css);
+        $this->assertStringContainsString('.hero { background-image: var(--dynamo-hero_bg); }', $css);
+    }
+
     public function test_full_requires_path_emits_prereq_rule_and_var_rule(): void {
         dynamo_config_customizer([
             'id'       => 'sidebar_layout',

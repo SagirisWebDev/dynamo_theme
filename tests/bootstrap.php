@@ -221,6 +221,37 @@ class WP_Customize_Control {
     }
 }
 
+class WP_Customize_Image_Control extends WP_Customize_Color_Control {}
+class WP_Customize_Media_Control extends WP_Customize_Color_Control {}
+
+function esc_url_raw(string $url): string {
+    return $url;
+}
+
+function absint(mixed $maybe): int {
+    return abs((int) $maybe);
+}
+
+function wp_get_attachment_url(int $attachment_id): string|false {
+    return $GLOBALS['wp_attachment_urls'][$attachment_id] ?? false;
+}
+
+function sanitize_text_field(string $text): string {
+    return trim($text);
+}
+
+function sanitize_textarea_field(string $text): string {
+    return $text;
+}
+
+function wp_kses_post(string $data): string {
+    return $data;
+}
+
+function wp_localize_script(string $handle, string $name, array $data): void {
+    $GLOBALS['wp_localized'][$handle][$name] = $data;
+}
+
 class WP_Theme_JSON_Data {
     private array $data;
 
@@ -256,10 +287,6 @@ require_once DYNAMO_PATH . 'includes/class-dynamo-binding-preview-bridge.php';
 require_once DYNAMO_PATH . 'includes/dynamo-binding-api.php';
 require_once __DIR__ . '/MakesCustomizer.php';
 require_once __DIR__ . '/FakeCustomizeManager.php';
-
-function wp_localize_script(string $handle, string $object_name, mixed $data): void {
-    $GLOBALS['wp_localized'][$handle][$object_name] = $data;
-}
 
 function dynamo_bust_css_cache(): void {
     (new Dynamo_CSS_Cache())->bust();

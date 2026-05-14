@@ -206,6 +206,90 @@ class BindingCSSRendererTest extends TestCase {
         $this->assertStringNotContainsString('position:', $css);
     }
 
+    private function mediaRegistry(array $overrides = []): Dynamo_Binding_Registry {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register(array_merge([
+            'id'       => 'hero_bg',
+            'type'     => 'media',
+            'label'    => 'Hero background',
+            'section'  => 'hero',
+            'selector' => '.hero',
+            'property' => 'background-image',
+        ], $overrides));
+        return $registry;
+    }
+
+    public function test_media_binding_resolves_attachment_id_to_url(): void {
+        $GLOBALS['wp_attachment_urls'] = [42 => 'http://localhost/wp-content/uploads/hero.jpg'];
+        set_theme_mod('dynamo_hero_bg', 42);
+        $css = (new Dynamo_Binding_CSS_Renderer($this->mediaRegistry()))->render();
+        $this->assertStringContainsString(
+            "--dynamo-hero_bg: url('http://localhost/wp-content/uploads/hero.jpg');",
+            $css
+        );
+    }
+
+    public function test_media_binding_with_zero_default_emits_empty(): void {
+        $css = (new Dynamo_Binding_CSS_Renderer($this->mediaRegistry()))->render();
+        // Default is 0; resolve_value emits '' for a missing attachment, no url() wrap.
+        $this->assertStringContainsString('--dynamo-hero_bg: ;', $css);
+        $this->assertStringNotContainsString('--dynamo-hero_bg: 0;', $css);
+        $this->assertStringNotContainsString("url('')", $css);
+    }
+
+    public function test_media_binding_unknown_attachment_id_emits_empty(): void {
+        $GLOBALS['wp_attachment_urls'] = [];
+        set_theme_mod('dynamo_hero_bg', 999);
+        $css = (new Dynamo_Binding_CSS_Renderer($this->mediaRegistry()))->render();
+        $this->assertStringContainsString('--dynamo-hero_bg: ;', $css);
+    }
+
+    public function test_url_binding_wraps_default_url_with_css_url(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'logo_url',
+            'type'     => 'url',
+            'label'    => 'Logo URL',
+            'section'  => 'branding',
+            'selector' => '.site-logo',
+            'property' => 'background-image',
+            'default'  => 'http://localhost/logo.png',
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString("--dynamo-logo_url: url('http://localhost/logo.png');", $css);
+    }
+
+    public function test_image_binding_wraps_default_url_with_css_url(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'logo_image',
+            'type'     => 'image',
+            'label'    => 'Logo image',
+            'section'  => 'branding',
+            'selector' => '.site-logo',
+            'property' => 'background-image',
+            'default'  => 'http://localhost/logo.png',
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString("--dynamo-logo_image: url('http://localhost/logo.png');", $css);
+    }
+
+    public function test_url_binding_does_not_double_wrap_already_wrapped_value(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'logo_url',
+            'type'     => 'url',
+            'label'    => 'Logo URL',
+            'section'  => 'branding',
+            'selector' => '.site-logo',
+            'property' => 'background-image',
+            'default'  => "url('http://localhost/logo.png')",
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString("--dynamo-logo_url: url('http://localhost/logo.png');", $css);
+        $this->assertStringNotContainsString("url('url(", $css);
+    }
+
     public function test_multiple_bindings_each_emit_both_layers(): void {
         $registry = new Dynamo_Binding_Registry();
         $registry->register([

@@ -390,6 +390,40 @@ class BindingValidatorTest extends TestCase {
         $this->assertStringContainsString('not handled automatically', $msg);
     }
 
+    private function validUrlArgs(array $overrides = []): array {
+        return array_merge([
+            'id'       => 'logo_image',
+            'type'     => 'image',
+            'label'    => 'Logo image',
+            'section'  => 'branding',
+            'selector' => '.site-logo',
+            'property' => 'background-image',
+        ], $overrides);
+    }
+
+    public function test_url_type_with_background_image_is_valid(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validUrlArgs(['type' => 'url']));
+        $this->assertSame([], $errors);
+    }
+
+    public function test_image_type_with_background_image_is_valid(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validUrlArgs());
+        $this->assertSame([], $errors);
+    }
+
+    public function test_media_type_with_background_image_is_valid(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validUrlArgs(['type' => 'media']));
+        $this->assertSame([], $errors);
+    }
+
+    public function test_url_type_with_color_property_is_incompatible(): void {
+        $errors = (new Dynamo_Binding_Validator())->validate($this->validUrlArgs([
+            'type'     => 'url',
+            'property' => 'background-color',
+        ]));
+        $this->assertStringContainsString('incompatible', strtolower(implode(' ', $errors)));
+    }
+
     public function test_parent_requirement_property_align_self_is_reported_as_unsupported(): void {
         $args = $this->validRadioArgs([
             'id'       => 'card_align',
