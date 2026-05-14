@@ -36,9 +36,10 @@ class Dynamo_Customizer_Binding_Adapter {
                 $sections_created[$section_slug] = true;
             }
 
-            $setting_id = $binding['setting_id'];
+            $setting_id     = $binding['setting_id'];
+            $setting_default = self::setting_default($binding);
             $wp_customize->add_setting($setting_id, [
-                'default'           => $binding['default'],
+                'default'           => $setting_default,
                 'sanitize_callback' => $binding['sanitize_callback'],
                 'transport'         => 'postMessage',
             ]);
@@ -77,6 +78,17 @@ class Dynamo_Customizer_Binding_Adapter {
 
     private static function derive_label(string $slug): string {
         return ucwords(str_replace(['_', '-'], ' ', $slug));
+    }
+
+    private static function setting_default(array $binding): mixed {
+        $default = $binding['default'];
+        if (($binding['type'] ?? '') !== 'code') {
+            return $default;
+        }
+        if (is_string($default) && str_contains($default, '{')) {
+            return $default;
+        }
+        return "{$binding['selector']} {\n    {$binding['property']}: {$default};\n}";
     }
 
     private static function flatten_choices(array $choices): array {

@@ -34,6 +34,26 @@ class BindingPreviewBridgeTest extends TestCase {
         $this->assertSame('background-color', $entry['property']);
     }
 
+    public function test_metadata_includes_binding_type(): void {
+        $map = (new Dynamo_Binding_Preview_Bridge($this->colorRegistry()))->build_metadata();
+        $this->assertSame('color', $map['dynamo_header_bg']['type']);
+    }
+
+    public function test_code_binding_metadata_includes_type_code(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'        => 'card_shadow',
+            'type'      => 'code',
+            'code_type' => 'css',
+            'label'     => 'Card shadow',
+            'section'   => 'advanced',
+            'selector'  => '.card',
+            'property'  => 'box-shadow',
+        ]);
+        $map = (new Dynamo_Binding_Preview_Bridge($registry))->build_metadata();
+        $this->assertSame('code', $map['dynamo_card_shadow']['type']);
+    }
+
     public function test_color_binding_metadata_omits_choices_map(): void {
         $map = (new Dynamo_Binding_Preview_Bridge($this->colorRegistry()))->build_metadata();
         $this->assertArrayNotHasKey('choicesMap', $map['dynamo_header_bg']);

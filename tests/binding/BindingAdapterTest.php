@@ -404,7 +404,11 @@ class BindingAdapterTest extends TestCase {
         (new Dynamo_Customizer_Binding_Adapter($registry))->apply($manager);
         $this->assertInstanceOf(WP_Customize_Code_Editor_Control::class, $manager->controls[0]);
         $this->assertSame('wp_kses_post', $manager->settings['dynamo_custom_btn_css']['sanitize_callback']);
-        $this->assertSame('', $manager->settings['dynamo_custom_btn_css']['default']);
+        // Code bindings pre-fill the editor with `selector { property: ; }` so the linter passes.
+        $this->assertSame(
+            ".btn {\n    box-shadow: ;\n}",
+            $manager->settings['dynamo_custom_btn_css']['default']
+        );
     }
 
     public function test_code_binding_forwards_code_type_to_control_property(): void {
@@ -423,6 +427,73 @@ class BindingAdapterTest extends TestCase {
         $control = $manager->controls[0];
         $this->assertSame('css', $control->code_type);
         $this->assertSame('css', $control->args['code_type']);
+    }
+
+    public function test_code_binding_default_is_full_block_for_linter(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'        => 'card_shadow',
+            'type'      => 'code',
+            'code_type' => 'css',
+            'label'     => 'Card shadow',
+            'section'   => 'advanced',
+            'selector'  => '.card',
+            'property'  => 'box-shadow',
+            'default'   => '0 4px 12px rgba(0,0,0,0.15)',
+        ]);
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($registry))->apply($manager);
+        $this->assertSame(
+            ".card {\n    box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n}",
+            $manager->settings['dynamo_card_shadow']['default']
+        );
+    }
+
+    public function test_code_binding_default_with_full_block_is_passed_through_unchanged(): void {
+        // Dev explicitly provided a full block as default — adapter must not re-wrap.
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'        => 'card_shadow',
+            'type'      => 'code',
+            'code_type' => 'css',
+            'label'     => 'Card shadow',
+            'section'   => 'advanced',
+            'selector'  => '.card',
+            'property'  => 'box-shadow',
+            'default'   => ".card {\n    box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n    transition: box-shadow 200ms ease;\n}",
+        ]);
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($registry))->apply($manager);
+        $this->assertSame(
+            ".card {\n    box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n    transition: box-shadow 200ms ease;\n}",
+            $manager->settings['dynamo_card_shadow']['default']
+        );
+    }
+
+    public function test_code_binding_with_empty_default_yields_empty_block_with_property(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'        => 'card_shadow',
+            'type'      => 'code',
+            'code_type' => 'css',
+            'label'     => 'Card shadow',
+            'section'   => 'advanced',
+            'selector'  => '.card',
+            'property'  => 'box-shadow',
+        ]);
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($registry))->apply($manager);
+        // No default value → editor still pre-fills with the property template so the linter passes.
+        $this->assertSame(
+            ".card {\n    box-shadow: ;\n}",
+            $manager->settings['dynamo_card_shadow']['default']
+        );
+    }
+
+    public function test_non_code_binding_default_is_unchanged(): void {
+        $manager = new FakeCustomizeManager();
+        (new Dynamo_Customizer_Binding_Adapter($this->colorRegistry(['default' => '#abcdef'])))->apply($manager);
+        $this->assertSame('#abcdef', $manager->settings['dynamo_header_bg']['default']);
     }
 
     public function test_code_binding_forwards_alternate_code_type(): void {

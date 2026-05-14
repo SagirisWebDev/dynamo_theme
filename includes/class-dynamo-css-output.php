@@ -27,5 +27,12 @@ class Dynamo_CSS_Output {
         }
 
         echo '<style id="dynamo-dynamic-css">' . $css . "</style>\n";
+
+        if (class_exists('Dynamo_Binding_Registry') && class_exists('Dynamo_Binding_CSS_Renderer')) {
+            $renderer = new Dynamo_Binding_CSS_Renderer(Dynamo_Binding_Registry::instance());
+            foreach ($renderer->extras_blocks() as $id => $block) {
+                echo '<style id="dynamo-binding-extras-' . $id . '">' . $block . "</style>\n";
+            }
+        }
     }
 }

@@ -290,6 +290,185 @@ class BindingCSSRendererTest extends TestCase {
         $this->assertStringNotContainsString("url('url(", $css);
     }
 
+    public function test_content_property_wraps_string_value_in_double_quotes(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'before_text',
+            'type'     => 'text',
+            'label'    => 'Before text',
+            'section'  => 'banner',
+            'selector' => '.banner::before',
+            'property' => 'content',
+            'default'  => 'Hello',
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString('--dynamo-before_text: "Hello";', $css);
+    }
+
+    public function test_content_property_does_not_double_wrap_already_quoted_value(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'before_text',
+            'type'     => 'text',
+            'label'    => 'Before text',
+            'section'  => 'banner',
+            'selector' => '.banner::before',
+            'property' => 'content',
+            'default'  => '"Already quoted"',
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString('--dynamo-before_text: "Already quoted";', $css);
+        $this->assertStringNotContainsString('""Already', $css);
+    }
+
+    public function test_content_property_does_not_wrap_keywords(): void {
+        foreach (['none', 'normal', 'initial', 'inherit', 'unset', 'revert'] as $keyword) {
+            $registry = new Dynamo_Binding_Registry();
+            $registry->register([
+                'id'       => 'before_text',
+                'type'     => 'text',
+                'label'    => 'Before text',
+                'section'  => 'banner',
+                'selector' => '.banner::before',
+                'property' => 'content',
+                'default'  => $keyword,
+            ]);
+            $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+            $this->assertStringContainsString("--dynamo-before_text: {$keyword};", $css);
+            $this->assertStringNotContainsString("\"{$keyword}\"", $css);
+        }
+    }
+
+    public function test_content_property_does_not_wrap_function_values(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'before_text',
+            'type'     => 'text',
+            'label'    => 'Before text',
+            'section'  => 'banner',
+            'selector' => '.banner::before',
+            'property' => 'content',
+            'default'  => 'counter(section)',
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString('--dynamo-before_text: counter(section);', $css);
+    }
+
+    public function test_content_wrap_uses_saved_theme_mod_value(): void {
+        set_theme_mod('dynamo_before_text', '2026-05-14');
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'before_text',
+            'type'     => 'date',
+            'label'    => 'Date',
+            'section'  => 'banner',
+            'selector' => '.banner::before',
+            'property' => 'content',
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString('--dynamo-before_text: "2026-05-14";', $css);
+    }
+
+    public function test_non_content_string_property_is_not_wrapped(): void {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register([
+            'id'       => 'heading_font',
+            'type'     => 'text',
+            'label'    => 'Heading font',
+            'section'  => 'typography',
+            'selector' => 'h1',
+            'property' => 'font-family',
+            'default'  => 'Georgia, serif',
+        ]);
+        $css = (new Dynamo_Binding_CSS_Renderer($registry))->render();
+        $this->assertStringContainsString('--dynamo-heading_font: Georgia, serif;', $css);
+        $this->assertStringNotContainsString('"Georgia, serif"', $css);
+    }
+
+    private function codeRegistry(array $overrides = []): Dynamo_Binding_Registry {
+        $registry = new Dynamo_Binding_Registry();
+        $registry->register(array_merge([
+            'id'        => 'card_shadow',
+            'type'      => 'code',
+            'code_type' => 'css',
+            'label'     => 'Card shadow',
+            'section'   => 'advanced',
+            'selector'  => '.card',
+            'property'  => 'box-shadow',
+            'default'   => '0 4px 12px rgba(0,0,0,0.15)',
+        ], $overrides));
+        return $registry;
+    }
+
+    public function test_code_binding_with_bare_value_default_renders_normally(): void {
+        $css = (new Dynamo_Binding_CSS_Renderer($this->codeRegistry()))->render();
+        $this->assertStringContainsString('--dynamo-card_shadow: 0 4px 12px rgba(0,0,0,0.15);', $css);
+        $this->assertStringContainsString('.card { box-shadow: var(--dynamo-card_shadow); }', $css);
+    }
+
+    public function test_code_binding_with_saved_full_block_extracts_bound_property_value(): void {
+        set_theme_mod('dynamo_card_shadow', ".card {\n    box-shadow: 0 8px 24px rgba(0,0,0,0.3);\n}");
+        $css = (new Dynamo_Binding_CSS_Renderer($this->codeRegistry()))->render();
+        $this->assertStringContainsString('--dynamo-card_shadow: 0 8px 24px rgba(0,0,0,0.3);', $css);
+        $this->assertStringContainsString('.card { box-shadow: var(--dynamo-card_shadow); }', $css);
+    }
+
+    public function test_code_binding_main_rule_omits_extras(): void {
+        set_theme_mod(
+            'dynamo_card_shadow',
+            ".card {\n    box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n    transition: box-shadow 200ms ease;\n}"
+        );
+        $renderer = new Dynamo_Binding_CSS_Renderer($this->codeRegistry());
+        $css = $renderer->render();
+        $this->assertStringContainsString('--dynamo-card_shadow: 0 4px 12px rgba(0,0,0,0.15);', $css);
+        $this->assertStringContainsString('.card { box-shadow: var(--dynamo-card_shadow); }', $css);
+        // Extras must NOT appear inside the main rule's render() output anymore.
+        $this->assertStringNotContainsString('transition:', $css);
+    }
+
+    public function test_code_binding_extras_blocks_returns_sibling_decls_keyed_by_id(): void {
+        set_theme_mod(
+            'dynamo_card_shadow',
+            ".card {\n    box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n    transition: box-shadow 200ms ease;\n    border: 2px solid red;\n}"
+        );
+        $blocks = (new Dynamo_Binding_CSS_Renderer($this->codeRegistry()))->extras_blocks();
+        $this->assertArrayHasKey('card_shadow', $blocks);
+        $this->assertSame('.card { transition: box-shadow 200ms ease; border: 2px solid red; }', $blocks['card_shadow']);
+    }
+
+    public function test_code_binding_extras_blocks_omits_bindings_without_extras(): void {
+        set_theme_mod('dynamo_card_shadow', ".card {\n    box-shadow: 0 4px 12px rgba(0,0,0,0.15);\n}");
+        $blocks = (new Dynamo_Binding_CSS_Renderer($this->codeRegistry()))->extras_blocks();
+        $this->assertArrayNotHasKey('card_shadow', $blocks);
+    }
+
+    public function test_extras_blocks_excludes_non_code_bindings(): void {
+        $blocks = (new Dynamo_Binding_CSS_Renderer($this->colorRegistry()))->extras_blocks();
+        $this->assertSame([], $blocks);
+    }
+
+    public function test_code_binding_with_only_extra_declarations_falls_back_to_default_for_bound_property(): void {
+        // Saved CSS deletes the bound property but adds a sibling — the bound var
+        // falls back to the default's bare value, and the sibling decl is exposed via extras_blocks.
+        set_theme_mod('dynamo_card_shadow', ".card {\n    transition: box-shadow 200ms ease;\n}");
+        $renderer = new Dynamo_Binding_CSS_Renderer($this->codeRegistry());
+        $css = $renderer->render();
+        $this->assertStringContainsString('--dynamo-card_shadow: 0 4px 12px rgba(0,0,0,0.15);', $css);
+        $this->assertStringContainsString('.card { box-shadow: var(--dynamo-card_shadow); }', $css);
+        $this->assertSame(
+            '.card { transition: box-shadow 200ms ease; }',
+            $renderer->extras_blocks()['card_shadow']
+        );
+    }
+
+    public function test_code_binding_ignores_editor_selector_uses_binding_selector(): void {
+        // Dev pasted `.foo` as the editor's selector. We honor the binding's selector.
+        set_theme_mod('dynamo_card_shadow', ".foo {\n    box-shadow: 0 1px 2px rgba(0,0,0,0.5);\n}");
+        $css = (new Dynamo_Binding_CSS_Renderer($this->codeRegistry()))->render();
+        $this->assertStringContainsString('.card { box-shadow: var(--dynamo-card_shadow); }', $css);
+        $this->assertStringNotContainsString('.foo {', $css);
+    }
+
     public function test_multiple_bindings_each_emit_both_layers(): void {
         $registry = new Dynamo_Binding_Registry();
         $registry->register([

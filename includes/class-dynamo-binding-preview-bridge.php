@@ -5,7 +5,7 @@ class Dynamo_Binding_Preview_Bridge {
 
     private Dynamo_Binding_Registry $registry;
 
-    public function __construct(Dynamo_Binding_Registry $registry) {
+    public function __construct(?Dynamo_Binding_Registry $registry) {
         $this->registry = $registry;
     }
 
@@ -15,6 +15,7 @@ class Dynamo_Binding_Preview_Bridge {
             $entry = [
                 'selector' => $binding['selector'],
                 'property' => $binding['property'],
+                'type'     => $binding['type'],
             ];
             if (isset($binding['unit']) && '' !== $binding['unit']) {
                 $entry['unit'] = $binding['unit'];
