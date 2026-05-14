@@ -28,6 +28,7 @@ add_action('after_setup_theme', function(): void {
     $customizer->init();
     $theme_json->init();
     $options->init();
+    add_action('admin_notices', [$fonts, 'render_admin_notice']);
 });
 
 add_action('after_setup_theme', function(): void {

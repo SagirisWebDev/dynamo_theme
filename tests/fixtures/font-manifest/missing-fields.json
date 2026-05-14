@@ -1,0 +1,15 @@
+{
+    "complete": {
+        "label": "Complete",
+        "fallback": "sans-serif",
+        "faces": []
+    },
+    "no-label": {
+        "fallback": "sans-serif",
+        "faces": []
+    },
+    "no-fallback": {
+        "label": "No Fallback",
+        "faces": []
+    }
+}

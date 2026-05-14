@@ -99,6 +99,22 @@ function get_theme_mod(string $name, mixed $default = false): mixed {
     return $GLOBALS['wp_theme_mods'][$name] ?? $default;
 }
 
+function _doing_it_wrong(string $function_name, string $message, string $version): void {
+    $GLOBALS['wp_doing_it_wrong'][] = compact('function_name', 'message', 'version');
+}
+
+function current_user_can(string $capability): bool {
+    return (bool) ($GLOBALS['wp_current_user_can'][$capability] ?? false);
+}
+
+function esc_html__(string $text, string $domain = 'default'): string {
+    return $text;
+}
+
+function wp_kses_post(string $data): string {
+    return $data;
+}
+
 function update_option(string $option, mixed $value): bool {
     $GLOBALS['wp_options'][$option] = $value;
     return true;

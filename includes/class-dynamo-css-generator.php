@@ -34,6 +34,11 @@ class Dynamo_CSS_Generator {
         return ":root {\n" . implode("\n", $parts) . "\n}";
     }
 
+    // Last-resort fallback when a typography token references a slug
+    // that is not in the manifest. Same shape as the manifest's own
+    // baked-in safety fallback so the site always renders a real stack.
+    private const UNKNOWN_SLUG_FALLBACK = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+
     private function module_declarations(string $module): string {
         $lines = [];
         foreach ($this->registry->all() as $key => $value) {
@@ -44,7 +49,7 @@ class Dynamo_CSS_Generator {
                     $value = $saved;
                 }
                 if (str_ends_with($key, '-font-family')) {
-                    $value = $this->resolve_font_family((string) $value);
+                    $value = $this->resolve_font_family((string) $value, $key);
                 }
                 $lines[] = "  --dynamo-{$key}: {$value};";
             }
@@ -52,11 +57,19 @@ class Dynamo_CSS_Generator {
         return implode("\n", $lines);
     }
 
-    private function resolve_font_family(string $slug): string {
+    private function resolve_font_family(string $slug, string $token_key): string {
         $entry = $this->fonts->get($slug);
         if ($entry === null) {
-            // Unknown-slug handling stubbed for slice 1; hardened in slice 2.
-            return 'sans-serif';
+            _doing_it_wrong(
+                __METHOD__,
+                sprintf(
+                    'Typography token "%s" references unknown font slug "%s". Falling back to system stack.',
+                    $token_key,
+                    $slug
+                ),
+                '1.0.0'
+            );
+            return self::UNKNOWN_SLUG_FALLBACK;
         }
         $fallback = $entry['fallback'] ?? 'sans-serif';
         $faces    = $entry['faces'] ?? [];

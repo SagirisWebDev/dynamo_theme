@@ -56,4 +56,30 @@ class CSSGeneratorTest extends TestCase {
             $css
         );
     }
+
+    public function test_unknown_slug_resolves_to_hardcoded_system_fallback(): void {
+        add_filter('dynamo_token_defaults', function(array $defaults): array {
+            $defaults['typography-body-font-family'] = 'does-not-exist';
+            return $defaults;
+        });
+        $css = $this->makeGenerator()->generate();
+        $this->assertStringContainsString('--dynamo-typography-body-font-family:', $css);
+        $this->assertStringNotContainsString('--dynamo-typography-body-font-family: does-not-exist', $css);
+        $this->assertStringNotContainsString('--dynamo-typography-body-font-family: sans-serif;', $css);
+        $this->assertStringContainsString('-apple-system', $css);
+    }
+
+    public function test_unknown_slug_triggers_doing_it_wrong_notice(): void {
+        $GLOBALS['wp_doing_it_wrong'] = [];
+        add_filter('dynamo_token_defaults', function(array $defaults): array {
+            $defaults['typography-body-font-family'] = 'does-not-exist';
+            return $defaults;
+        });
+        $this->makeGenerator()->generate();
+        $calls = $GLOBALS['wp_doing_it_wrong'];
+        $this->assertNotEmpty($calls);
+        $combined = implode(' ', array_map(fn($c) => $c['message'], $calls));
+        $this->assertStringContainsString('does-not-exist', $combined);
+        $this->assertStringContainsString('typography-body-font-family', $combined);
+    }
 }

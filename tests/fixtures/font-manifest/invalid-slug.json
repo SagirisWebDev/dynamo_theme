@@ -1,0 +1,17 @@
+{
+    "valid-slug": {
+        "label": "Valid",
+        "fallback": "sans-serif",
+        "faces": []
+    },
+    "Invalid Slug": {
+        "label": "Bad",
+        "fallback": "sans-serif",
+        "faces": []
+    },
+    "Under_score": {
+        "label": "Also bad",
+        "fallback": "sans-serif",
+        "faces": []
+    }
+}
