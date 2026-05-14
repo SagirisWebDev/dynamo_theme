@@ -7,7 +7,7 @@ $dynamo_layout = Dynamo_Options::get_layout_mode();
 $dynamo_has_sidebar = in_array( $dynamo_layout, [ 'sidebar-left', 'sidebar-right' ], true );
 ?>
 
-<main id="main" class="site-main">
+<main id="main" class="site-main" tabindex="-1">
     <div class="dynamo-container dynamo-content-wrap<?php echo $dynamo_has_sidebar ? ' dynamo-has-sidebar' : ''; ?>">
 
         <?php if ( $dynamo_has_sidebar && $dynamo_layout === 'sidebar-left' ) : ?>
@@ -26,6 +26,10 @@ $dynamo_has_sidebar = in_array( $dynamo_layout, [ 'sidebar-left', 'sidebar-right
                             &mdash; <?php the_author(); ?>
                         </div>
                     </header>
+
+                    <?php if ( has_post_thumbnail() ) : ?>
+                        <figure class="entry-featured-image"><?php the_post_thumbnail( 'large' ); ?></figure>
+                    <?php endif; ?>
 
                     <div class="entry-content">
                         <?php

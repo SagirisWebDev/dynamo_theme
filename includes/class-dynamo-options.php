@@ -33,7 +33,7 @@ class Dynamo_Options {
         if (!self::is_feature_enabled('scroll_to_top')) {
             return;
         }
-        echo '<button type="button" class="dynamo-scroll-top" aria-label="' . esc_attr__('Scroll to top', 'dynamo') . '">&uarr;</button>';
+        echo '<button type="button" class="dynamo-scroll-top" aria-label="' . esc_attr__('Scroll to top', 'dynamo') . '" aria-hidden="true" tabindex="-1">&uarr;</button>';
     }
 
     public function register_menu(): void {

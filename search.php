@@ -4,7 +4,7 @@ declare(strict_types=1);
 get_header();
 ?>
 
-<main id="main" class="site-main">
+<main id="main" class="site-main" tabindex="-1">
 
     <header class="page-header">
         <div class="dynamo-container">
@@ -26,6 +26,9 @@ get_header();
 
             <?php while ( have_posts() ) : the_post(); ?>
                 <article id="post-<?php the_ID(); ?>" <?php post_class( 'post-card' ); ?>>
+                    <?php if ( has_post_thumbnail() ) : ?>
+                        <a class="entry-featured-image" href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1"><?php the_post_thumbnail( 'medium_large' ); ?></a>
+                    <?php endif; ?>
                     <header class="entry-header">
                         <h2 class="entry-title">
                             <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>

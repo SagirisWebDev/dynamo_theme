@@ -56,6 +56,7 @@ class Dynamo_Breadcrumbs {
             $trail[] = ['label' => get_the_author(), 'url' => ''];
         } elseif (is_search()) {
             $trail[] = [
+                /* translators: %s: search query */
                 'label' => sprintf(__('Search results for "%s"', 'dynamo'), get_search_query()),
                 'url'   => '',
             ];

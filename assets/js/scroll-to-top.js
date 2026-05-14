@@ -5,10 +5,14 @@
     var threshold = 300;
 
     function update() {
-        if ((window.scrollY || window.pageYOffset) > threshold) {
-            btn.classList.add('is-visible');
+        var visible = (window.scrollY || window.pageYOffset) > threshold;
+        btn.classList.toggle('is-visible', visible);
+        if (visible) {
+            btn.removeAttribute('aria-hidden');
+            btn.removeAttribute('tabindex');
         } else {
-            btn.classList.remove('is-visible');
+            btn.setAttribute('aria-hidden', 'true');
+            btn.setAttribute('tabindex', '-1');
         }
     }
 

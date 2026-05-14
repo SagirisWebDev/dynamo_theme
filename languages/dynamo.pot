@@ -1,0 +1,325 @@
+# Copyright (C) 2026 
+# This file is distributed under the GPL-2.0-or-later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Dynamo 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/dynamo\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-05-14T18:34:13+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: dynamo\n"
+
+#. Theme Name of the theme
+#: style.css
+msgid "Dynamo"
+msgstr ""
+
+#. Description of the theme
+#: style.css
+msgid "A performant, token-driven WordPress theme with dynamic CSS custom properties."
+msgstr ""
+
+#: 404.php:12
+msgid "Page not found"
+msgstr ""
+
+#: 404.php:16
+msgid "The page you're looking for doesn't exist. Try searching below."
+msgstr ""
+
+#: archive.php:29
+msgid "Archives"
+msgstr ""
+
+#: archive.php:71
+#: index.php:39
+msgid "No posts found."
+msgstr ""
+
+#. translators: %s: post title
+#: comments.php:19
+#, php-format
+msgid "One thought on &ldquo;%s&rdquo;"
+msgstr ""
+
+#. translators: 1: comment count, 2: post title
+#: comments.php:25
+#, php-format
+msgid "%1$s thought on &ldquo;%2$s&rdquo;"
+msgid_plural "%1$s thoughts on &ldquo;%2$s&rdquo;"
+msgstr[0] ""
+msgstr[1] ""
+
+#: comments.php:45
+msgid "&larr; Older comments"
+msgstr ""
+
+#: comments.php:46
+msgid "Newer comments &rarr;"
+msgstr ""
+
+#: comments.php:51
+msgid "Comments are closed."
+msgstr ""
+
+#: functions.php:54
+msgid "Primary Menu"
+msgstr ""
+
+#: functions.php:62
+msgid "Toggle menu"
+msgstr ""
+
+#: functions.php:63
+msgid "Menu"
+msgstr ""
+
+#: functions.php:83
+msgid "Primary Sidebar"
+msgstr ""
+
+#: functions.php:85
+msgid "Appears when a sidebar layout is active."
+msgstr ""
+
+#: header.php:13
+msgid "Skip to content"
+msgstr ""
+
+#: includes/class-dynamo-breadcrumbs.php:19
+msgid "Breadcrumb"
+msgstr ""
+
+#: includes/class-dynamo-breadcrumbs.php:35
+msgid "Home"
+msgstr ""
+
+#. translators: %s: search query
+#: includes/class-dynamo-breadcrumbs.php:60
+#, php-format
+msgid "Search results for \"%s\""
+msgstr ""
+
+#: includes/class-dynamo-breadcrumbs.php:64
+msgid "Not found"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:24
+msgid "Dynamo: Colours"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:29
+msgid "Colours"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:34
+msgid "Primary Colour"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:35
+msgid "Secondary Colour"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:36
+msgid "Accent Colour"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:37
+msgid "Background"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:38
+msgid "Text Colour"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:39
+msgid "Link Colour"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:40
+msgid "Section Alt Background"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:64
+msgid "Dynamo: Typography"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:69
+msgid "Body Text"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:70
+msgid "Heading 1 (H1)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:71
+msgid "Heading 2 (H2)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:72
+msgid "Heading 3 (H3)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:73
+msgid "Heading 4 (H4)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:74
+msgid "Heading 5 (H5)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:75
+msgid "Heading 6 (H6)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:79
+msgid "Regular (400)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:80
+msgid "Medium (500)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:81
+msgid "Semi-bold (600)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:82
+msgid "Bold (700)"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:94
+msgid "Font Family"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:98
+msgid "Font Size"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:102
+msgid "Font Weight"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:107
+msgid "Line Height"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:134
+msgid "Dynamo: Spacing"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:139
+msgid "Header"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:140
+msgid "Footer"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:141
+msgid "Content"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:151
+msgid "Padding Top"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:152
+msgid "Padding Bottom"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:153
+msgid "Horizontal Padding"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:184
+msgid "Dynamo: Layout"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:189
+msgid "Layout"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:194
+msgid "Container Max Width"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:195
+msgid "Content Width"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:196
+msgid "Sidebar Width"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:216
+msgid "Dynamo: Borders & Shadows"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:221
+msgid "Borders & Shadows"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:226
+msgid "Border Radius"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:227
+msgid "Border Colour"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:228
+msgid "Border Width"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:229
+msgid "Shadow Small"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:230
+msgid "Shadow Medium"
+msgstr ""
+
+#: includes/class-dynamo-customizer.php:231
+msgid "Shadow Large"
+msgstr ""
+
+#: includes/class-dynamo-options.php:36
+msgid "Scroll to top"
+msgstr ""
+
+#: includes/class-dynamo-options.php:41
+#: includes/class-dynamo-options.php:42
+msgid "Dynamo Options"
+msgstr ""
+
+#: index.php:30
+msgid "Read more"
+msgstr ""
+
+#. translators: %s: search query
+#: search.php:15
+#, php-format
+msgid "Search results for: %s"
+msgstr ""
+
+#: search.php:50
+msgid "No results found."
+msgstr ""
+
+#: single.php:42
+msgid "Tags: "
+msgstr ""
+
+#: single.php:48
+msgid "&larr; Previous post"
+msgstr ""
+
+#: single.php:49
+msgid "Next post &rarr;"
+msgstr ""

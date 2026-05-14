@@ -4,7 +4,7 @@ declare(strict_types=1);
 get_header();
 ?>
 
-<main id="main" class="site-main">
+<main id="main" class="site-main" tabindex="-1">
     <div class="dynamo-container dynamo-content-wrap">
 
         <section class="error-404 not-found">
