@@ -29,6 +29,11 @@ class Dynamo_Cookie_Driver_Complianz implements Dynamo_Cookie_Driver {
     }
 
     public function get_consent_categories(): array {
-        return ['statistics', 'marketing', 'preferences'];
+        return [
+            ['slug' => 'marketing',   'label' => 'Marketing'],
+            ['slug' => 'statistics',  'label' => 'Statistics'],
+            ['slug' => 'functional',  'label' => 'Functional'],
+            ['slug' => 'preferences', 'label' => 'Preferences'],
+        ];
     }
 }

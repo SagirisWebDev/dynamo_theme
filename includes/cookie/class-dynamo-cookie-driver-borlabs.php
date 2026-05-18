@@ -29,6 +29,10 @@ class Dynamo_Cookie_Driver_Borlabs implements Dynamo_Cookie_Driver {
     }
 
     public function get_consent_categories(): array {
-        return ['statistics', 'marketing'];
+        if (! class_exists('BorlabsCookie\Cookie\ServiceGroup') && ! class_exists('BorlabsCookie')) {
+            return [];
+        }
+        // TODO: Query Borlabs service groups when the Borlabs classes are available.
+        return [];
     }
 }

@@ -297,3 +297,14 @@ require_once __DIR__ . '/FakeCustomizeManager.php';
 function dynamo_bust_css_cache(): void {
     (new Dynamo_CSS_Cache())->bust();
 }
+
+$GLOBALS['wp_rest_routes']      = [];
+$GLOBALS['wp_current_user_can'] = [];
+
+function register_rest_route(string $namespace, string $route, array $args = []): void {
+    $GLOBALS['wp_rest_routes'][] = [
+        'namespace' => $namespace,
+        'route'     => $route,
+        'args'      => $args,
+    ];
+}

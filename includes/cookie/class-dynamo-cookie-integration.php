@@ -46,6 +46,11 @@ class Dynamo_Cookie_Integration {
         if ($this->driver !== null) {
             $this->driver->register_palette_sync_hooks();
             $this->driver->register_embed_hooks();
+            register_rest_route('dynamo/v1', '/cookie-categories', [
+                'methods'             => 'GET',
+                'callback'            => fn() => $this->driver->get_consent_categories(),
+                'permission_callback' => fn() => current_user_can('edit_posts'),
+            ]);
         }
     }
 
