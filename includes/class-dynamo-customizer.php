@@ -18,6 +18,7 @@ class Dynamo_Customizer {
     public function init(): void {
         add_action('customize_register', [$this, 'register']);
         add_action('customize_preview_init', [$this, 'enqueue_preview_script']);
+        add_action('customize_controls_enqueue_scripts', [$this, 'enqueue_controls_script']);
         add_action('customize_save_after', fn() => dynamo_bust_css_cache());
     }
 
@@ -106,8 +107,9 @@ class Dynamo_Customizer {
                     'sanitize_callback' => $sanitize_font_slug,
                 ],
                 'font-size' => [
-                    'label' => __('Font Size', 'dynamo'),
-                    'type'  => 'text',
+                    'label'       => __('Font Size', 'dynamo'),
+                    'type'        => 'text',
+                    'input_attrs' => ['data-dynamo-step' => '0.125'],
                 ],
                 'font-weight' => [
                     'label'   => __('Font Weight', 'dynamo'),
@@ -115,8 +117,9 @@ class Dynamo_Customizer {
                     'choices' => $font_weight_choices,
                 ],
                 'line-height' => [
-                    'label' => __('Line Height', 'dynamo'),
-                    'type'  => 'text',
+                    'label'       => __('Line Height', 'dynamo'),
+                    'type'        => 'text',
+                    'input_attrs' => ['data-dynamo-step' => '0.1'],
                 ],
             ];
 
@@ -131,10 +134,11 @@ class Dynamo_Customizer {
                 ]);
 
                 $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
-                    'label'   => $control_args['label'],
-                    'section' => $section_id,
-                    'type'    => $control_args['type'],
-                    'choices' => $control_args['choices'] ?? [],
+                    'label'       => $control_args['label'],
+                    'section'     => $section_id,
+                    'type'        => $control_args['type'],
+                    'choices'     => $control_args['choices'] ?? [],
+                    'input_attrs' => $control_args['input_attrs'] ?? [],
                 ]));
             }
         }
@@ -182,9 +186,10 @@ class Dynamo_Customizer {
                 ]);
 
                 $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
-                    'label'   => $labels[$prop],
-                    'section' => $section_id,
-                    'type'    => 'text',
+                    'label'       => $labels[$prop],
+                    'section'     => $section_id,
+                    'type'        => 'text',
+                    'input_attrs' => ['data-dynamo-step' => '0.125'],
                 ]));
             }
         }
@@ -215,9 +220,10 @@ class Dynamo_Customizer {
                 'transport'         => 'postMessage',
             ]);
             $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
-                'label'   => $label,
-                'section' => 'dynamo_layout_section',
-                'type'    => 'text',
+                'label'       => $label,
+                'section'     => 'dynamo_layout_section',
+                'type'        => 'text',
+                'input_attrs' => ['data-dynamo-step' => '1'],
             ]));
         }
     }
@@ -233,16 +239,12 @@ class Dynamo_Customizer {
             'panel' => 'dynamo_borders_shadows',
         ]);
 
-        $controls = [
-            'borders-radius' => __('Border Radius', 'dynamo'),
-            'borders-color'  => __('Border Colour', 'dynamo'),
-            'borders-width'  => __('Border Width', 'dynamo'),
-            'shadows-sm'     => __('Shadow Small', 'dynamo'),
-            'shadows-md'     => __('Shadow Medium', 'dynamo'),
-            'shadows-lg'     => __('Shadow Large', 'dynamo'),
+        $border_text_controls = [
+            'borders-radius' => ['label' => __('Border Radius', 'dynamo'), 'step' => '0.125'],
+            'borders-width'  => ['label' => __('Border Width', 'dynamo'),  'step' => '1'],
         ];
 
-        foreach ($controls as $token => $label) {
+        foreach ($border_text_controls as $token => $args) {
             $setting_id = 'dynamo_' . str_replace('-', '_', $token);
             $wp_customize->add_setting($setting_id, [
                 'default'           => $this->registry->get($token) ?? '',
@@ -250,9 +252,75 @@ class Dynamo_Customizer {
                 'transport'         => 'postMessage',
             ]);
             $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
-                'label'   => $label,
+                'label'       => $args['label'],
+                'section'     => 'dynamo_borders_shadows_section',
+                'type'        => 'text',
+                'input_attrs' => ['data-dynamo-step' => $args['step']],
+            ]));
+        }
+
+        $wp_customize->add_setting('dynamo_borders_color', [
+            'default'           => $this->registry->get('borders-color') ?? '#000000',
+            'sanitize_callback' => 'sanitize_hex_color',
+            'transport'         => 'postMessage',
+        ]);
+        $wp_customize->add_control(new WP_Customize_Color_Control($wp_customize, 'dynamo_borders_color', [
+            'label'   => __('Border Colour', 'dynamo'),
+            'section' => 'dynamo_borders_shadows_section',
+        ]));
+
+        $length_description = __(
+            'Four lengths in order: offset-x offset-y blur-radius spread-radius. '
+            . 'offset-x shifts the shadow horizontally (positive = right, negative = left). '
+            . 'offset-y shifts the shadow vertically (positive = down, negative = up). '
+            . 'blur-radius softens the edge (higher = blurrier). '
+            . 'spread-radius grows (positive) or shrinks (negative) the shadow. '
+            . 'Prefix with "inset" to draw the shadow inside the element. '
+            . 'Separate multiple stacked shadows with commas.',
+            'dynamo'
+        );
+
+        $shadow_groups = [
+            'sm' => __('Header & Menu', 'dynamo'),
+            'md' => __('Product Card', 'dynamo'),
+        ];
+
+        foreach ($shadow_groups as $size => $group_label) {
+            $color_setting = "dynamo_shadows_{$size}_color";
+            $wp_customize->add_setting($color_setting, [
+                'default'           => $this->registry->get("shadows-{$size}-color") ?? '#000000',
+                'sanitize_callback' => 'sanitize_hex_color',
+                'transport'         => 'postMessage',
+            ]);
+            $wp_customize->add_control(new WP_Customize_Color_Control($wp_customize, $color_setting, [
+                'label'   => sprintf(__('%s Shadow Colour', 'dynamo'), $group_label),
                 'section' => 'dynamo_borders_shadows_section',
-                'type'    => 'text',
+            ]));
+
+            $opacity_setting = "dynamo_shadows_{$size}_opacity";
+            $wp_customize->add_setting($opacity_setting, [
+                'default'           => $this->registry->get("shadows-{$size}-opacity") ?? '1',
+                'sanitize_callback' => 'sanitize_text_field',
+                'transport'         => 'postMessage',
+            ]);
+            $wp_customize->add_control(new WP_Customize_Control($wp_customize, $opacity_setting, [
+                'label'       => sprintf(__('%s Shadow Opacity', 'dynamo'), $group_label),
+                'description' => __('A value between 0 (fully transparent) and 1 (fully opaque).', 'dynamo'),
+                'section'     => 'dynamo_borders_shadows_section',
+                'type'        => 'text',
+            ]));
+
+            $length_setting = "dynamo_shadows_{$size}_length";
+            $wp_customize->add_setting($length_setting, [
+                'default'           => $this->registry->get("shadows-{$size}-length") ?? '',
+                'sanitize_callback' => 'sanitize_text_field',
+                'transport'         => 'postMessage',
+            ]);
+            $wp_customize->add_control(new WP_Customize_Control($wp_customize, $length_setting, [
+                'label'       => sprintf(__('%s Shadow Length', 'dynamo'), $group_label),
+                'description' => $length_description,
+                'section'     => 'dynamo_borders_shadows_section',
+                'type'        => 'text',
             ]));
         }
     }
@@ -275,9 +343,19 @@ class Dynamo_Customizer {
         );
 
         
-        $css = $this->cache->get() ?? $this->generator->generate() ?? '';                                           
+        $css = $this->cache->get() ?? $this->generator->generate() ?? '';
         wp_localize_script('dynamo-customizer-preview', 'dynamoPreview', apply_filters('dynamo_customizer_preview_data', [
             'initialCss' => $css,
-        ])); 
+        ]));
+    }
+
+    public function enqueue_controls_script(): void {
+        wp_enqueue_script(
+            'dynamo-customizer-controls',
+            DYNAMO_URL . 'assets/js/customizer-controls.js',
+            ['customize-controls'],
+            DYNAMO_VERSION,
+            true
+        );
     }
 }

@@ -5,6 +5,8 @@ use PHPUnit\Framework\TestCase;
 
 class LayoutModuleTest extends TestCase {
 
+    use MakesCustomizer;
+
     private array $layout_tokens = [
         'layout-container-max-width' => '1200px',
         'layout-content-width'       => '720px',
@@ -20,7 +22,7 @@ class LayoutModuleTest extends TestCase {
         if (!empty($tokens)) {
             add_filter('dynamo_token_defaults', fn() => $tokens);
         }
-        return new Dynamo_CSS_Generator($registry);
+        return new Dynamo_CSS_Generator($registry, new Dynamo_Font_Manifest(__DIR__ . '/fixtures/font-manifest/valid.json'));
     }
 
     public function test_all_layout_tokens_have_defaults(): void {
@@ -48,7 +50,7 @@ class LayoutModuleTest extends TestCase {
 
     public function test_customizer_register_adds_layout_panel(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $this->assertArrayHasKey('dynamo_layout', $manager->panels);
@@ -56,7 +58,7 @@ class LayoutModuleTest extends TestCase {
 
     public function test_customizer_register_adds_layout_section(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $this->assertArrayHasKey('dynamo_layout_section', $manager->sections);
@@ -65,7 +67,7 @@ class LayoutModuleTest extends TestCase {
 
     public function test_customizer_register_adds_all_layout_controls(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $control_ids = array_map(fn($c) => $c->id, $manager->controls);
@@ -77,7 +79,7 @@ class LayoutModuleTest extends TestCase {
 
     public function test_layout_settings_use_postmessage_transport(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $this->assertSame('postMessage', $manager->settings['dynamo_layout_container_max_width']['transport']);

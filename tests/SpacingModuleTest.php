@@ -5,6 +5,8 @@ use PHPUnit\Framework\TestCase;
 
 class SpacingModuleTest extends TestCase {
 
+    use MakesCustomizer;
+
     private array $all_spacing_tokens = [
         'spacing-header-padding-top'    => '2rem',
         'spacing-header-padding-bottom' => '2rem',
@@ -24,7 +26,7 @@ class SpacingModuleTest extends TestCase {
         if (!empty($tokens)) {
             add_filter('dynamo_token_defaults', fn() => $tokens);
         }
-        return new Dynamo_CSS_Generator($registry);
+        return new Dynamo_CSS_Generator($registry, new Dynamo_Font_Manifest(__DIR__ . '/fixtures/font-manifest/valid.json'));
     }
 
     public function test_all_spacing_tokens_have_defaults(): void {
@@ -52,14 +54,14 @@ class SpacingModuleTest extends TestCase {
     public function test_generate_with_empty_token_set_returns_empty_string(): void {
         add_filter('dynamo_token_defaults', fn() => []);
         $registry  = new Dynamo_Token_Registry();
-        $generator = new Dynamo_CSS_Generator($registry);
+        $generator = new Dynamo_CSS_Generator($registry, new Dynamo_Font_Manifest(__DIR__ . '/fixtures/font-manifest/valid.json'));
         $css = $generator->generate();
         $this->assertSame('', $css);
     }
 
     public function test_customizer_register_adds_spacing_panel(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $this->assertArrayHasKey('dynamo_spacing', $manager->panels);
@@ -67,7 +69,7 @@ class SpacingModuleTest extends TestCase {
 
     public function test_customizer_register_adds_header_footer_content_sections(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $this->assertArrayHasKey('dynamo_spacing_header', $manager->sections);
@@ -77,7 +79,7 @@ class SpacingModuleTest extends TestCase {
 
     public function test_customizer_register_adds_all_spacing_controls(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $control_ids = array_map(fn($c) => $c->id, $manager->controls);

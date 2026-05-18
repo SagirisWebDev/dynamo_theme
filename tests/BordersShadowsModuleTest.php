@@ -5,6 +5,8 @@ use PHPUnit\Framework\TestCase;
 
 class BordersShadowsModuleTest extends TestCase {
 
+    use MakesCustomizer;
+
     private array $border_tokens = [
         'borders-radius' => '0.375rem',
         'borders-color'  => '#e5e7eb',
@@ -12,9 +14,12 @@ class BordersShadowsModuleTest extends TestCase {
     ];
 
     private array $shadow_tokens = [
-        'shadows-sm' => '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        'shadows-md' => '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        'shadows-lg' => '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        'shadows-sm-length'  => '0 1px 2px 0',
+        'shadows-sm-color'   => '#000000',
+        'shadows-sm-opacity' => '0.05',
+        'shadows-md-length'  => '0 4px 6px -1px, 0 2px 4px -2px',
+        'shadows-md-color'   => '#000000',
+        'shadows-md-opacity' => '0.1',
     ];
 
     protected function setUp(): void {
@@ -30,7 +35,7 @@ class BordersShadowsModuleTest extends TestCase {
         if (!empty($tokens)) {
             add_filter('dynamo_token_defaults', fn() => $tokens);
         }
-        return new Dynamo_CSS_Generator($registry);
+        return new Dynamo_CSS_Generator($registry, new Dynamo_Font_Manifest(__DIR__ . '/fixtures/font-manifest/valid.json'));
     }
 
     public function test_all_border_and_shadow_tokens_have_defaults(): void {
@@ -43,9 +48,13 @@ class BordersShadowsModuleTest extends TestCase {
 
     public function test_generate_contains_all_border_and_shadow_custom_properties(): void {
         $css = $this->makeGenerator()->generate();
-        foreach (array_keys($this->allTokens()) as $token) {
+        foreach (array_keys($this->border_tokens) as $token) {
             $prop = '--dynamo-' . $token;
             $this->assertStringContainsString($prop, $css, "Missing {$prop} in generated CSS");
+        }
+        foreach (['shadows-sm', 'shadows-md'] as $composed) {
+            $prop = '--dynamo-' . $composed;
+            $this->assertStringContainsString($prop, $css, "Missing composed {$prop} in generated CSS");
         }
     }
 
@@ -56,7 +65,6 @@ class BordersShadowsModuleTest extends TestCase {
         $this->assertStringContainsString('--dynamo-borders-width: 1px;', $css);
         $this->assertStringContainsString('--dynamo-shadows-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);', $css);
         $this->assertStringContainsString('--dynamo-shadows-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);', $css);
-        $this->assertStringContainsString('--dynamo-shadows-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);', $css);
     }
 
     public function test_generated_css_contains_no_unclosed_braces(): void {
@@ -68,7 +76,7 @@ class BordersShadowsModuleTest extends TestCase {
 
     public function test_customizer_register_adds_borders_shadows_panel(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $this->assertArrayHasKey('dynamo_borders_shadows', $manager->panels);
@@ -76,7 +84,7 @@ class BordersShadowsModuleTest extends TestCase {
 
     public function test_customizer_register_adds_borders_shadows_section(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $this->assertArrayHasKey('dynamo_borders_shadows_section', $manager->sections);
@@ -85,7 +93,7 @@ class BordersShadowsModuleTest extends TestCase {
 
     public function test_customizer_register_adds_all_border_and_shadow_controls(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         $control_ids = array_map(fn($c) => $c->id, $manager->controls);
@@ -93,14 +101,17 @@ class BordersShadowsModuleTest extends TestCase {
         $this->assertContains('dynamo_borders_radius', $control_ids);
         $this->assertContains('dynamo_borders_color', $control_ids);
         $this->assertContains('dynamo_borders_width', $control_ids);
-        $this->assertContains('dynamo_shadows_sm', $control_ids);
-        $this->assertContains('dynamo_shadows_md', $control_ids);
-        $this->assertContains('dynamo_shadows_lg', $control_ids);
+        $this->assertContains('dynamo_shadows_sm_length', $control_ids);
+        $this->assertContains('dynamo_shadows_sm_color', $control_ids);
+        $this->assertContains('dynamo_shadows_sm_opacity', $control_ids);
+        $this->assertContains('dynamo_shadows_md_length', $control_ids);
+        $this->assertContains('dynamo_shadows_md_color', $control_ids);
+        $this->assertContains('dynamo_shadows_md_opacity', $control_ids);
     }
 
     public function test_border_and_shadow_settings_use_postmessage_transport(): void {
         $manager    = new FakeCustomizeManager();
-        $customizer = new Dynamo_Customizer(new Dynamo_Token_Registry());
+        $customizer = $this->make_customizer();
         $customizer->register($manager);
 
         foreach (array_keys($this->allTokens()) as $token) {

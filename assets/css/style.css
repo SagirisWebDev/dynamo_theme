@@ -113,6 +113,34 @@ h6 {
     outline-offset: 2px;
 }
 
+/* ── Header menu + cart wrapper ─────────────────────────────────────────── */
+/* Applies at all viewports so the menu toggle button (a child of the nav, which
+   is a flex item of this wrapper) moves with the customizer setting on mobile
+   and tablet too. The open dropdown <ul> stays unaffected because it is
+   absolutely positioned relative to .dynamo-container (see mobile rules below). */
+.dynamo-header-menu-cart {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+    justify-content: var(--dynamo-header-menu-cart, flex-end);
+}
+
+/* When the wrapper is set to space-between, the position setting controls the
+   cart icon's placement via auto margins (which override the flex algorithm).
+   Outside of space-between, no auto margins are applied so the cart sits with
+   the menu under the wrapper's justify-content. */
+.dynamo-header-menu-cart--space-between .dynamo-header-cart--left {
+    margin-right: auto;
+}
+.dynamo-header-menu-cart--space-between .dynamo-header-cart--center {
+    margin-inline: auto;
+}
+.dynamo-header-menu-cart--space-between .dynamo-header-cart--right {
+    margin-left: auto;
+}
+
 .site-title {
     margin: 0;
     font-family: var(--dynamo-typography-h1-font-family);
@@ -450,26 +478,28 @@ h6 {
     color: var(--dynamo-colors-secondary);
 }
 
-/* ── Primary nav (menu-primary-container) ───────────────────────────────── */
-
-.menu-primary-container ul {
+/* ── Primary nav ─────────────────────────────────────────────────────────── */
+/* Targets the <nav> element wp_nav_menu emits inside the header, so styles
+   apply regardless of the menu's slug or container class. */
+.site-header nav ul {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding-block: 0;
+    padding-inline: 0.5rem;
     display: flex;
     flex-wrap: wrap;
     gap: 1.5rem;
 }
 
-.menu-primary-container ul a {
+.site-header nav ul a {
     color: inherit;
     text-decoration: none;
     display: inline-block;
     padding: 0.5rem 0;
 }
 
-.menu-primary-container ul a:hover,
-.menu-primary-container ul a:focus-visible {
+.site-header nav ul a:hover,
+.site-header nav ul a:focus-visible {
     text-decoration: underline;
 }
 
@@ -491,8 +521,8 @@ h6 {
 }
 
 .dynamo-menu-toggle__icon--close { display: none; }
-.menu-primary-container.is-open .dynamo-menu-toggle__icon--open  { display: none; }
-.menu-primary-container.is-open .dynamo-menu-toggle__icon--close { display: inline; }
+.site-header nav.is-open .dynamo-menu-toggle__icon--open  { display: none; }
+.site-header nav.is-open .dynamo-menu-toggle__icon--close { display: inline; }
 
 @media (max-width: 921px) {
     .dynamo-menu-toggle {
@@ -504,14 +534,29 @@ h6 {
         position: relative;
     }
 
-    .menu-primary-container ul {
+    /* Force the .dynamo-header-menu-cart wrapper to occupy at least half the
+       container width on narrow viewports, then let the brand title shrink
+       (with min-width: 0 + ellipsis) so the surplus space inside the wrapper
+       lets justify-content actually redistribute the toggle + cart icon. */
+    .site-header .site-title {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .site-header .dynamo-header-menu-cart {
+        min-width: 50%;
+    }
+
+    .site-header nav ul {
         display: none;
         flex-direction: column;
         gap: 0;
         width: 100%;
     }
 
-    .menu-primary-container.is-open ul {
+    .site-header nav.is-open ul {
         display: flex;
         position: absolute;
         top: 3rem;
@@ -524,12 +569,12 @@ h6 {
         z-index: 50;
     }
 
-    .menu-primary-container ul li {
+    .site-header nav ul li {
         border-top: var(--dynamo-borders-width, 1px) solid var(--dynamo-borders-color, rgba(255, 255, 255, 0.15));
         width: 100%;
     }
 
-    .menu-primary-container ul a {
+    .site-header nav ul a {
         display: block;
         padding: 0.75rem 0;
         width: 100%;

@@ -2,6 +2,7 @@ node_modules/
 vendor/
 issues/
 .phpunit.result.cache
+.phpunit.cache/
 .claude/
 phpunit.xml
 .agents/

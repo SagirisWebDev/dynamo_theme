@@ -16,14 +16,12 @@ class Dynamo_CSS_Output {
     }
 
     public function print_styles(): void {
-        $debug = defined('WP_DEBUG') && WP_DEBUG;
-        $css   = $debug ? null : $this->cache->get();
+        $bypass_cache = (defined('WP_DEBUG') && WP_DEBUG) || is_customize_preview();
+        $css          = $bypass_cache ? null : $this->cache->get();
 
         if (null === $css) {
-            $css  = $this->generator->generate() ?: '';
-            // $file_contents = file_get_contents(get_template_directory() . '/assets/css/style.css') ?: '';
-            // $css .= $file_contents;
-            if (!$debug) {
+            $css = $this->generator->generate() ?: '';
+            if (!$bypass_cache) {
                 $this->cache->set($css);
             }
         }

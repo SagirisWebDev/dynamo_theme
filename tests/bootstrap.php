@@ -12,6 +12,9 @@ $GLOBALS['wp_theme_mods']         = [];
 $GLOBALS['wp_theme_pages']        = [];
 $GLOBALS['wp_registered_settings'] = [];
 $GLOBALS['wp_enqueued_scripts']   = [];
+$GLOBALS['wp_enqueued_styles']    = [];
+$GLOBALS['wp_theme_supports']     = [];
+$GLOBALS['wp_removed_actions']    = [];
 
 function add_filter(string $tag, callable $callback, int $priority = 10, int $accepted_args = 1): void {
     $GLOBALS['wp_filter'][$tag][$priority][] = $callback;
@@ -61,7 +64,53 @@ function wp_enqueue_script(string $handle, string $src = '', array $deps = [], m
     $GLOBALS['wp_enqueued_script_deps'][$handle] = $deps;
 }
 
-function wp_enqueue_style(): void {}
+function wp_enqueue_style(string $handle = '', string $src = '', array $deps = [], mixed $ver = false, string $media = 'all'): void {
+    if ($handle !== '') {
+        $GLOBALS['wp_enqueued_styles'][] = $handle;
+    }
+}
+
+function add_theme_support(string $feature, mixed ...$args): bool {
+    $GLOBALS['wp_theme_supports'][$feature] = $args === [] ? true : $args;
+    return true;
+}
+
+function current_theme_supports(string $feature): bool {
+    return array_key_exists($feature, $GLOBALS['wp_theme_supports'] ?? []);
+}
+
+function is_woocommerce(): bool {
+    return (bool) ($GLOBALS['wp_is_woocommerce'] ?? false);
+}
+
+function is_cart(): bool {
+    return (bool) ($GLOBALS['wp_is_cart'] ?? false);
+}
+
+function is_checkout(): bool {
+    return (bool) ($GLOBALS['wp_is_checkout'] ?? false);
+}
+
+function is_account_page(): bool {
+    return (bool) ($GLOBALS['wp_is_account_page'] ?? false);
+}
+
+function wc_get_cart_url(): string {
+    return $GLOBALS['wc_cart_url'] ?? 'http://localhost/cart/';
+}
+
+function WC(): object {
+    return new class {
+        public object $cart;
+        public function __construct() {
+            $this->cart = new class {
+                public function get_cart_contents_count(): int {
+                    return (int) ($GLOBALS['wc_cart_count'] ?? 0);
+                }
+            };
+        }
+    };
+}
 
 function add_theme_page(string $page_title, string $menu_title, string $capability, string $menu_slug, ?callable $callback = null): void {
     $GLOBALS['wp_theme_pages'][] = $menu_slug;
@@ -73,13 +122,15 @@ function register_setting(string $option_group, string $option_name, array $args
 
 function plugin_dir_url(): string { return DYNAMO_URL; }
 
-function remove_action(string $tag, mixed $callback, int $priority = 10): bool {
-    $GLOBALS['wp_removed_actions'][] = $tag;
+function remove_action(string $tag, mixed $callback = null, int $priority = 10): bool {
+    $GLOBALS['wp_removed_actions'][]      = $tag;
+    $GLOBALS['wp_removed_action_specs'][] = ['tag' => $tag, 'callback' => $callback, 'priority' => $priority];
     return true;
 }
 
-function remove_filter(string $tag, mixed $callback, int $priority = 10): bool {
-    $GLOBALS['wp_removed_actions'][] = $tag;
+function remove_filter(string $tag, mixed $callback = null, int $priority = 10): bool {
+    $GLOBALS['wp_removed_actions'][]      = $tag;
+    $GLOBALS['wp_removed_action_specs'][] = ['tag' => $tag, 'callback' => $callback, 'priority' => $priority];
     return true;
 }
 
@@ -114,6 +165,7 @@ function esc_html__(string $text, string $domain = 'default'): string {
 function wp_kses_post(string $data): string {
     return $data;
 }
+
 
 function update_option(string $option, mixed $value): bool {
     $GLOBALS['wp_options'][$option] = $value;
@@ -190,6 +242,9 @@ require_once DYNAMO_PATH . 'includes/class-dynamo-css-generator.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-css-cache.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-customizer.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-theme-json-sync.php';
+require_once DYNAMO_PATH . 'includes/woocommerce/class-dynamo-woocommerce.php';
+require_once __DIR__ . '/MakesCustomizer.php';
+require_once __DIR__ . '/FakeCustomizeManager.php';
 
 function dynamo_bust_css_cache(): void {
     (new Dynamo_CSS_Cache())->bust();

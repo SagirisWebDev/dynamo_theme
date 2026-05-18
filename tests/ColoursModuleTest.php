@@ -24,7 +24,7 @@ class ColoursModuleTest extends TestCase {
         if (!empty($tokens)) {
             add_filter('dynamo_token_defaults', fn() => $tokens);
         }
-        return new Dynamo_CSS_Generator($registry);
+        return new Dynamo_CSS_Generator($registry, new Dynamo_Font_Manifest(__DIR__ . '/fixtures/font-manifest/valid.json'));
     }
 
     public function test_all_seven_colour_tokens_have_defaults(): void {

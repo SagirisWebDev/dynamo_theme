@@ -5,6 +5,8 @@ use PHPUnit\Framework\TestCase;
 
 class TypographyModuleTest extends TestCase {
 
+    use MakesCustomizer;
+
     protected function setUp(): void {
         $GLOBALS['wp_filter'] = [];
     }

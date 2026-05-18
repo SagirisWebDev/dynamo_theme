@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-define('DYNAMO_VERSION', '1.0.0');
+define('DYNAMO_VERSION', '1.1.0');
 define('DYNAMO_PATH', get_template_directory());
 define('DYNAMO_URL', trailingslashit(get_template_directory_uri()));
 
@@ -12,26 +12,34 @@ require_once DYNAMO_PATH . '/includes/class-dynamo-css-generator.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-css-cache.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-css-output.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-customizer.php';
+require_once DYNAMO_PATH . '/includes/class-dynamo-header-customizer.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-theme-json-sync.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-options.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-breadcrumbs.php';
+require_once DYNAMO_PATH . '/includes/woocommerce/class-dynamo-woocommerce.php';
 
 add_action('after_setup_theme', function(): void {
-    $registry      = new Dynamo_Token_Registry();
-    $fonts         = new Dynamo_Font_Manifest(DYNAMO_PATH . '/fonts/fonts.json');
-    $font_renderer = new Dynamo_Font_Renderer($fonts, DYNAMO_URL . 'fonts/');
-    $cache         = new Dynamo_CSS_Cache();
-    $generator     = new Dynamo_CSS_Generator($registry, $fonts);
-    $output        = new Dynamo_CSS_Output($generator, $cache);
-    $customizer    = new Dynamo_Customizer($registry, $cache, $generator, $fonts);
-    $theme_json    = new Dynamo_Theme_JSON_Sync($registry);
-    $options       = new Dynamo_Options();
+    $registry          = new Dynamo_Token_Registry();
+    $fonts             = new Dynamo_Font_Manifest(DYNAMO_PATH . '/fonts/fonts.json');
+    $font_renderer     = new Dynamo_Font_Renderer($fonts, DYNAMO_URL . 'fonts/');
+    $cache             = new Dynamo_CSS_Cache();
+    $generator         = new Dynamo_CSS_Generator($registry, $fonts);
+    $output            = new Dynamo_CSS_Output($generator, $cache);
+    $customizer        = new Dynamo_Customizer($registry, $cache, $generator, $fonts);
+    $header_customizer = new Dynamo_Header_Customizer($registry);
+    $theme_json        = new Dynamo_Theme_JSON_Sync($registry);
+    $options           = new Dynamo_Options();
     $output->init();
     $font_renderer->init();
     $customizer->init();
+    $header_customizer->init();
     $theme_json->init();
     $options->init();
     add_action('admin_notices', [$fonts, 'render_admin_notice']);
+
+    if (class_exists('WooCommerce')) {
+        (new Dynamo_WooCommerce())->init();
+    }
 });
 
 add_action('after_setup_theme', function(): void {

@@ -63,9 +63,48 @@ class Dynamo_Token_Registry {
         'borders-color'  => '#e5e7eb',
         'borders-width'  => '1px',
 
-        'shadows-sm' => '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        'shadows-md' => '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        'shadows-lg' => '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        'shadows-sm-length'  => '0 1px 2px 0',
+        'shadows-sm-color'   => '#000000',
+        'shadows-sm-opacity' => '0.05',
+        'shadows-md-length'  => '0 4px 6px -1px, 0 2px 4px -2px',
+        'shadows-md-color'   => '#000000',
+        'shadows-md-opacity' => '0.1',
+
+        'header-menu-cart' => 'flex-end',
+
+        'woocommerce-sale-badge-bg'    => '#dc2626',
+        'woocommerce-sale-badge-color' => '#ffffff',
+        'woocommerce-star-color'       => '#f59e0b',
+        'woocommerce-add-to-cart-bg'    => '#3b82f6',
+        'woocommerce-add-to-cart-color' => '#ffffff',
+        'woocommerce-single-price-color' => '#111827',
+        'woocommerce-loop-price-color'   => '#111827',
+
+        'woocommerce-shop-columns'           => '3',
+        'woocommerce-shop-products-per-page' => '12',
+
+        'woocommerce-header-cart-enabled'  => '1',
+        'woocommerce-header-cart-position' => 'right',
+
+        'woocommerce-single-show-title'        => '1',
+        'woocommerce-single-show-price'        => '1',
+        'woocommerce-single-show-rating'       => '1',
+        'woocommerce-single-show-excerpt'      => '1',
+        'woocommerce-single-show-add-to-cart'  => '1',
+        'woocommerce-single-show-meta'         => '1',
+        'woocommerce-single-related-columns'   => '4',
+
+        'woocommerce-quantity-buttons-enabled' => '1',
+
+        'woocommerce-cart-checkout-button-text' => '',
+        'woocommerce-cart-cross-sells-enabled'  => '1',
+
+        'woocommerce-card-show-image'             => '1',
+        'woocommerce-card-show-title'             => '1',
+        'woocommerce-card-show-price'             => '1',
+        'woocommerce-card-show-rating'            => '1',
+        'woocommerce-card-show-short-description' => '0',
+        'woocommerce-card-show-add-to-cart'       => '1',
     ];
 
     public function get(string $key): ?string {
