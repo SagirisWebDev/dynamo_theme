@@ -24,6 +24,12 @@ require_once DYNAMO_PATH . '/includes/class-dynamo-theme-json-sync.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-options.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-breadcrumbs.php';
 require_once DYNAMO_PATH . '/includes/woocommerce/class-dynamo-woocommerce.php';
+require_once DYNAMO_PATH . '/includes/cookie/interface-dynamo-cookie-driver.php';
+require_once DYNAMO_PATH . '/includes/cookie/class-dynamo-cookie-driver-complianz.php';
+require_once DYNAMO_PATH . '/includes/cookie/class-dynamo-cookie-driver-borlabs.php';
+require_once DYNAMO_PATH . '/includes/cookie/class-dynamo-cookie-integration.php';
+
+add_action('after_setup_theme', [new Dynamo_Cookie_Integration(), 'detect_and_register'], 11);
 
 if (file_exists(DYNAMO_PATH . '/dynamo-extend-customizer.php')) {
     require_once DYNAMO_PATH . '/dynamo-extend-customizer.php';
