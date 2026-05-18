@@ -27,6 +27,9 @@ class Dynamo_Cookie_Driver_Complianz implements Dynamo_Cookie_Driver {
     }
 
     public function register_embed_hooks(): void {
+        add_filter('dynamo_has_consent', static function (bool $_, string $category): bool {
+            return function_exists('cmplz_has_consent') && cmplz_has_consent($category);
+        }, 10, 2);
         add_filter('the_content', static function (string $content): string {
             return Dynamo_Consent_Placeholder::replace_embeds($content);
         });

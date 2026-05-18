@@ -27,6 +27,12 @@ class Dynamo_Cookie_Driver_Borlabs implements Dynamo_Cookie_Driver {
     }
 
     public function register_embed_hooks(): void {
+        add_filter('dynamo_has_consent', static function (bool $_, string $category): bool {
+            if (class_exists('BorlabsCookie\Cookie\Cookie')) {
+                return BorlabsCookie\Cookie\Cookie::getInstance()->isAccepted($category);
+            }
+            return false;
+        }, 10, 2);
         add_filter('the_content', static function (string $content): string {
             return Dynamo_Consent_Placeholder::replace_embeds($content);
         });

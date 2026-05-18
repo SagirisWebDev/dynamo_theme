@@ -19,7 +19,7 @@ class Dynamo_Consent_Placeholder {
                 if ($info === null) {
                     return $matches[0];
                 }
-                if (dynamo_has_consent($info['category'])) {
+                if (apply_filters('dynamo_has_consent', false, $info['category'])) {
                     return $matches[0];
                 }
                 return self::render_placeholder($info['service'], $info['category'], $matches[0]);
