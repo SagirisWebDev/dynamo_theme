@@ -32,8 +32,8 @@
     }
 
     document.addEventListener('cmplz_status_change', function (e) {
-        if (e.detail && e.detail.status) {
-            revealForCategory(e.detail.status);
+        if (e.detail && e.detail.category && e.detail.value === 'allow') {
+            revealForCategory(e.detail.category);
         }
     });
 

@@ -338,3 +338,11 @@ function register_rest_route(string $namespace, string $route, array $args = [])
         'args'      => $args,
     ];
 }
+
+function is_product_category(): bool {
+    return (bool) ($GLOBALS['wp_is_product_category'] ?? false);
+}
+
+function is_product_tag(): bool {
+    return (bool) ($GLOBALS['wp_is_product_tag'] ?? false);
+}
