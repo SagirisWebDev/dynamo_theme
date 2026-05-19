@@ -33,6 +33,20 @@ class TokenRegistryTest extends TestCase {
         $this->assertArrayHasKey('colors-primary', $registry->all());
     }
 
+    public function test_get_returns_theme_mod_value_over_default(): void {
+        set_theme_mod('dynamo_colors_primary', '#abcdef');
+        $registry = new Dynamo_Token_Registry();
+        $this->assertSame('#abcdef', $registry->get('colors-primary'));
+        unset($GLOBALS['wp_theme_mods']['dynamo_colors_primary']);
+    }
+
+    public function test_get_returns_default_when_theme_mod_is_empty_string(): void {
+        set_theme_mod('dynamo_colors_primary', '');
+        $registry = new Dynamo_Token_Registry();
+        $this->assertNotEmpty($registry->get('colors-primary'));
+        unset($GLOBALS['wp_theme_mods']['dynamo_colors_primary']);
+    }
+
     public function test_typography_font_family_defaults_are_slug_references(): void {
         $registry = new Dynamo_Token_Registry();
         foreach (['body', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as $element) {
