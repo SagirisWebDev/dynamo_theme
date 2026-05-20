@@ -6,15 +6,17 @@ define('DYNAMO_PATH', dirname(__DIR__) . '/');
 define('DYNAMO_URL', 'http://localhost/');
 define('DAY_IN_SECONDS', 86400);
 
-$GLOBALS['wp_filter']             = [];
-$GLOBALS['wp_transients']         = [];
-$GLOBALS['wp_theme_mods']         = [];
-$GLOBALS['wp_theme_pages']        = [];
+$GLOBALS['wp_filter']              = [];
+$GLOBALS['wp_transients']          = [];
+$GLOBALS['wp_theme_mods']          = [];
+$GLOBALS['wp_theme_pages']         = [];
 $GLOBALS['wp_registered_settings'] = [];
-$GLOBALS['wp_enqueued_scripts']   = [];
-$GLOBALS['wp_enqueued_styles']    = [];
-$GLOBALS['wp_theme_supports']     = [];
-$GLOBALS['wp_removed_actions']    = [];
+$GLOBALS['wp_enqueued_scripts']    = [];
+$GLOBALS['wp_enqueued_styles']     = [];
+$GLOBALS['wp_theme_supports']      = [];
+$GLOBALS['wp_removed_actions']     = [];
+$GLOBALS['wp_options']             = [];
+$GLOBALS['wp_update_option_calls'] = [];
 
 function add_filter(string $tag, callable $callback, int $priority = 10, int $accepted_args = 1): void {
     $GLOBALS['wp_filter'][$tag][$priority][] = $callback;
@@ -194,7 +196,9 @@ function esc_html(string $text): string {
 }
 
 function esc_attr(string $text): string {
-    return $text;
+    // Mirror WordPress core esc_attr(): encode HTML special chars with quote
+    // styles enabled so attribute values are not parseable as live markup.
+    return htmlspecialchars($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
 function esc_attr__(string $text, string $domain = 'default'): string {
@@ -296,4 +300,49 @@ require_once __DIR__ . '/FakeCustomizeManager.php';
 
 function dynamo_bust_css_cache(): void {
     (new Dynamo_CSS_Cache())->bust();
+}
+
+$GLOBALS['wp_rest_routes']      = [];
+$GLOBALS['wp_current_user_can'] = [];
+
+function wp_upload_dir(): array {
+    return ['basedir' => sys_get_temp_dir()];
+}
+
+function wp_cache_delete_group(string $group): bool {
+    return true;
+}
+
+// Minimal wpdb stub so write_palette_to_db() can run in unit tests.
+// Tests that need to inspect queries can read $GLOBALS['wpdb_update_calls'].
+class Stub_wpdb {
+    public string $prefix = 'wp_';
+
+    public function get_col(string $query): array {
+        return $GLOBALS['wpdb_mock_ids'] ?? ['1'];
+    }
+
+    public function update(string $table, array $data, array $where): int {
+        $GLOBALS['wpdb_update_calls'][] = compact('table', 'data', 'where');
+        return 1;
+    }
+}
+$GLOBALS['wpdb']             = new Stub_wpdb();
+$GLOBALS['wpdb_update_calls'] = [];
+$GLOBALS['wpdb_mock_ids']    = ['1'];
+
+function register_rest_route(string $namespace, string $route, array $args = []): void {
+    $GLOBALS['wp_rest_routes'][] = [
+        'namespace' => $namespace,
+        'route'     => $route,
+        'args'      => $args,
+    ];
+}
+
+function is_product_category(): bool {
+    return (bool) ($GLOBALS['wp_is_product_category'] ?? false);
+}
+
+function is_product_tag(): bool {
+    return (bool) ($GLOBALS['wp_is_product_tag'] ?? false);
 }

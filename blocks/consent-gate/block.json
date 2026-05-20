@@ -1,0 +1,19 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "dynamo/consent-gate",
+    "title": "Consent Gate",
+    "category": "embed",
+    "description": "Hides inner content until the visitor grants the required consent category.",
+    "textdomain": "dynamo",
+    "attributes": {
+        "consentCategory": {
+            "type": "string",
+            "default": ""
+        }
+    },
+    "supports": {
+        "html": false
+    },
+    "render": "file:./render.php"
+}

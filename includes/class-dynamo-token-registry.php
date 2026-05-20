@@ -112,6 +112,16 @@ class Dynamo_Token_Registry {
     }
 
     public function all(): array {
-        return apply_filters('dynamo_token_defaults', $this->defaults);
+        $tokens = apply_filters('dynamo_token_defaults', $this->defaults);
+        if (!function_exists('get_theme_mod')) {
+            return $tokens;
+        }
+        foreach ($tokens as $token => $default) {
+            $saved = get_theme_mod('dynamo_' . str_replace('-', '_', $token), false);
+            if ($saved !== false && $saved !== '') {
+                $tokens[$token] = $saved;
+            }
+        }
+        return $tokens;
     }
 }
