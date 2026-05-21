@@ -31,22 +31,17 @@ require_once DYNAMO_PATH . '/includes/cookie/class-dynamo-cookie-integration.php
 
 add_action('after_setup_theme', [new Dynamo_Cookie_Integration(), 'detect_and_register'], 11);
 
-if (!defined('DYNAMO_CONSENT_GATE_LOADED')) {
-    add_action('init', function(): void {
-        if (!function_exists('register_block_type')) { return; }
-        register_block_type(DYNAMO_PATH . '/blocks/consent-gate');
-    });
-
-    add_action('enqueue_block_editor_assets', function(): void {
-        wp_enqueue_script(
-            'dynamo-consent-gate-editor',
-            DYNAMO_URL . 'blocks/consent-gate/index.js',
-            ['wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n', 'wp-api-fetch'],
-            DYNAMO_VERSION,
-            true
-        );
-    });
-}
+add_action('admin_notices', function(): void {
+    if (WP_Block_Type_Registry::get_instance()->is_registered('dynamo/consent-gate')) {
+        return;
+    }
+    echo '<div class="notice notice-warning"><p>'
+        . wp_kses(
+            __('<strong>Dynamo:</strong> The Consent Gate block requires the <strong>Dynamo Consent Gate</strong> plugin. Please install and activate it.', 'dynamo'),
+            ['strong' => []]
+        )
+        . '</p></div>';
+});
 
 if (file_exists(DYNAMO_PATH . '/dynamo-extend-customizer.php')) {
     require_once DYNAMO_PATH . '/dynamo-extend-customizer.php';
