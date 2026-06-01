@@ -28,6 +28,34 @@ Key features:
 * Six CSS modules: Colors, Typography, Spacing, Layout, Borders, Shadows
 * Public filter API locked and documented as stable from v1.0.0
 
+WooCommerce integration (requires WooCommerce plugin):
+
+* Full WooCommerce theme support with Dynamo-compatible wrappers
+* Token-driven WooCommerce styling: colours and layout driven by Customizer tokens
+* Shop grid: Customizer controls for column count and products per page
+* Single product page: show/hide toggles for title, price, rating, excerpt,
+  add-to-cart button, meta, and related products column count
+* Header cart icon with position control and AJAX-refreshable item count
+* Quantity +/− buttons with WooCommerce cart event integration
+* Cart and checkout: checkout button label override and cross-sells toggle
+* Product card element toggles: image, title, rating, price, short description,
+  and add-to-cart independently shown or hidden on the shop loop
+
+Font system:
+
+* Slug-based font manifest for registering custom font families
+* @font-face emission from the manifest at render time
+* Graceful degradation when font slugs cannot be resolved
+
+Customizer binding system:
+
+* Structured binding types: text, textarea, number/range, radio/select, URL,
+  image, media, date, and code — all wired through a unified binding layer
+* Property-prerequisite validation: controls declare a `requires` field and are
+  shown or hidden based on other token values
+* `dynamo-extend-customizer.php` developer template for adding custom controls
+  without editing theme files
+
 == Installation ==
 
 1. In your WordPress admin, go to Appearance → Themes → Add New.
@@ -66,6 +94,22 @@ RTL stylesheet support is planned for a future release.
 
 == Copyright ==
 
-Dynamo WordPress Theme, Copyright 2024.
+Dynamo WordPress Theme, Copyright 2024 Sagiris Web Development.
 Dynamo is distributed under the terms of the GNU GPL v2 or later.
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+== Resources ==
+
+Dynamo WordPress Theme, Copyright 2024 Sagiris Web Development
+License: GPL-2.0-or-later
+Source: https://sagirisdev.com/
+
+All JavaScript files in assets/js/ are original work by Sagiris Web Development
+and are distributed under the same GPL-2.0-or-later license as the theme.
+
+The options panel (assets/js/options/options.js) is compiled from source
+(src/admin/options.js) using @wordpress/scripts. It declares wp-element,
+wp-components, wp-api-fetch, and react-jsx-runtime as external dependencies
+provided by WordPress core — no third-party code is bundled in the output file.
+
+Screenshot: [to be added]

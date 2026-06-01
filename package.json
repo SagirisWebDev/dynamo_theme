@@ -7,8 +7,8 @@
         "test:browser": "playwright test",
         "test:browser:headed": "playwright test --headed",
         "typecheck": "echo 'PHP project — no JS typecheck'",
-        "build": "wp-scripts build src/admin/options.js --output-path=assets/js/options/",
-        "start": "wp-scripts start src/admin/options.js --output-path=assets/js/options/"
+        "build": "wp-scripts build",
+        "start": "wp-scripts start"
     },
     "jest": {
         "testEnvironment": "jest-environment-jsdom",
