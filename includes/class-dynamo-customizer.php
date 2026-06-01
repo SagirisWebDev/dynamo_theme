@@ -229,6 +229,33 @@ class Dynamo_Customizer {
                 'input_attrs' => ['data-dynamo-step' => '1'],
             ]));
         }
+
+        $this->register_layout_width_scale($wp_customize);
+    }
+
+    private function register_layout_width_scale(object $wp_customize): void {
+        $wp_customize->add_section('dynamo_layout_width_scale', [
+            'title' => __('Width Scale', 'dynamo'),
+            'panel' => 'dynamo_layout',
+        ]);
+
+        foreach (dynamo_layout_width_presets() as $slug => $data) {
+            $token = 'layout-width-' . $slug;
+            if (Dynamo_Token_Registry::is_alias($token)) {
+                continue;
+            }
+            $setting_id = 'dynamo_' . str_replace('-', '_', $token);
+            $wp_customize->add_setting($setting_id, [
+                'default'           => $this->registry->get($token) ?? $data['default'],
+                'sanitize_callback' => 'sanitize_text_field',
+                'transport'         => 'postMessage',
+            ]);
+            $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
+                'label'   => $data['label'],
+                'section' => 'dynamo_layout_width_scale',
+                'type'    => 'text',
+            ]));
+        }
     }
 
     private function register_borders_and_shadows(object $wp_customize): void {

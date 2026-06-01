@@ -3,6 +3,16 @@ declare(strict_types=1);
 
 class Dynamo_Token_Registry {
 
+    /**
+     * Width scale steps that alias an existing role token rather than storing
+     * their own value. Key = alias token, value = role token it resolves to.
+     * Resolved at read time so they always reflect the current role token value.
+     */
+    private const ALIASES = [
+        'layout-width-default'   => 'layout-content-width',
+        'layout-width-container' => 'layout-container-max-width',
+    ];
+
     private array $defaults = [
         'colors-primary'     => '#3b82f6',
         'colors-secondary'   => '#6b7280',
@@ -58,6 +68,9 @@ class Dynamo_Token_Registry {
         'layout-container-max-width' => '1200px',
         'layout-content-width'       => '720px',
         'layout-sidebar-width'       => '300px',
+        'layout-width-narrow'        => '640px',
+        'layout-width-wide'          => '1024px',
+        'layout-width-full'          => '100%',
 
         'borders-radius' => '0.375rem',
         'borders-color'  => '#e5e7eb',
@@ -113,15 +126,38 @@ class Dynamo_Token_Registry {
 
     public function all(): array {
         $tokens = apply_filters('dynamo_token_defaults', $this->defaults);
-        if (!function_exists('get_theme_mod')) {
-            return $tokens;
+        if (function_exists('get_theme_mod')) {
+            foreach ($tokens as $token => $default) {
+                $saved = get_theme_mod('dynamo_' . str_replace('-', '_', $token), false);
+                if ($saved !== false && $saved !== '') {
+                    $tokens[$token] = $saved;
+                }
+            }
         }
-        foreach ($tokens as $token => $default) {
-            $saved = get_theme_mod('dynamo_' . str_replace('-', '_', $token), false);
-            if ($saved !== false && $saved !== '') {
-                $tokens[$token] = $saved;
+        // Resolve alias tokens after theme mods are applied so they always
+        // reflect the current role-token value rather than a stale default.
+        // Skip if the target is absent or empty (e.g. stripped-down test registries).
+        foreach (self::ALIASES as $alias => $target) {
+            $resolved = $tokens[$target] ?? '';
+            if ('' !== $resolved) {
+                $tokens[$alias] = $resolved;
             }
         }
         return $tokens;
+    }
+
+    /**
+     * Resolve a token key to its effective value, following alias chains.
+     * For alias steps (layout-width-default, layout-width-container) this
+     * returns the live role-token value. For all other keys it returns the
+     * registered value (same as get()).
+     */
+    public function resolve_alias(string $key): ?string {
+        return $this->all()[$key] ?? null;
+    }
+
+    /** Returns true when the given token key is an alias of another token. */
+    public static function is_alias(string $key): bool {
+        return array_key_exists($key, self::ALIASES);
     }
 }

@@ -6,6 +6,7 @@ define('DYNAMO_PATH', get_template_directory());
 define('DYNAMO_URL', trailingslashit(get_template_directory_uri()));
 
 require_once DYNAMO_PATH . '/includes/class-dynamo-token-registry.php';
+require_once DYNAMO_PATH . '/includes/dynamo-layout-presets.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-font-manifest.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-font-renderer.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-css-vocabulary.php';
@@ -136,6 +137,22 @@ add_action('widgets_init', function(): void {
 add_action( 'wp_enqueue_scripts', function() {
     wp_enqueue_style( 'dynamo-style', DYNAMO_URL . 'assets/css/style.css', [], DYNAMO_VERSION );
 } );
+
+add_action('enqueue_block_editor_assets', function(): void {
+    $asset_file = DYNAMO_PATH . '/assets/js/editor/token-presets.asset.php';
+    $asset        = file_exists($asset_file) ? require $asset_file : ['dependencies' => [], 'version' => DYNAMO_VERSION];
+    $dependencies = array_unique(array_merge(
+        $asset['dependencies'],
+        ['wp-hooks', 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-compose']
+    ));
+    wp_enqueue_script(
+        'dynamo-token-presets',
+        DYNAMO_URL . 'assets/js/editor/token-presets.js',
+        $dependencies,
+        $asset['version'],
+        true
+    );
+});
 
 function dynamo_bust_css_cache(): void {
     (new Dynamo_CSS_Cache())->bust();
