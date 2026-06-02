@@ -280,6 +280,7 @@ class WP_Theme_JSON_Data {
 
 require_once DYNAMO_PATH . 'includes/class-dynamo-token-registry.php';
 require_once DYNAMO_PATH . 'includes/dynamo-layout-presets.php';
+require_once DYNAMO_PATH . 'includes/dynamo-border-radius-presets.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-font-manifest.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-font-renderer.php';
 require_once DYNAMO_PATH . 'includes/class-dynamo-options.php';

@@ -7,6 +7,7 @@ define('DYNAMO_URL', trailingslashit(get_template_directory_uri()));
 
 require_once DYNAMO_PATH . '/includes/class-dynamo-token-registry.php';
 require_once DYNAMO_PATH . '/includes/dynamo-layout-presets.php';
+require_once DYNAMO_PATH . '/includes/dynamo-border-radius-presets.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-font-manifest.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-font-renderer.php';
 require_once DYNAMO_PATH . '/includes/class-dynamo-css-vocabulary.php';

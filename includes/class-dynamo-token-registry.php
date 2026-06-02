@@ -72,9 +72,10 @@ class Dynamo_Token_Registry {
         'layout-width-wide'          => '1024px',
         'layout-width-full'          => '100%',
 
-        'borders-radius' => '0.375rem',
-        'borders-color'  => '#e5e7eb',
-        'borders-width'  => '1px',
+        'borders-radius'    => '0.375rem',
+        'borders-radius-lg' => '0.5rem',
+        'borders-color'     => '#e5e7eb',
+        'borders-width'     => '1px',
 
         'shadows-sm-length'  => '0 1px 2px 0',
         'shadows-sm-color'   => '#000000',
