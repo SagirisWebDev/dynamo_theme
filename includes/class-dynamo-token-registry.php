@@ -11,6 +11,7 @@ class Dynamo_Token_Registry {
     private const ALIASES = [
         'layout-width-default'   => 'layout-content-width',
         'layout-width-container' => 'layout-container-max-width',
+        'borders-radius-default' => 'borders-radius',
     ];
 
     private array $defaults = [
@@ -72,8 +73,12 @@ class Dynamo_Token_Registry {
         'layout-width-wide'          => '1024px',
         'layout-width-full'          => '100%',
 
-        'borders-radius'    => '0.375rem',
-        'borders-radius-lg' => '0.5rem',
+        'borders-radius'      => '0.375rem',
+        'borders-radius-none' => '0',
+        'borders-radius-sm'   => '0.25rem',
+        'borders-radius-lg'   => '0.5rem',
+        'borders-radius-xl'   => '0.75rem',
+        'borders-radius-pill' => '9999px',
         'borders-color'     => '#e5e7eb',
         'borders-width'     => '1px',
 

@@ -258,6 +258,31 @@ class Dynamo_Customizer {
         }
     }
 
+    private function register_radius_scale(object $wp_customize): void {
+        $wp_customize->add_section('dynamo_radius_scale', [
+            'title' => __('Radius Scale', 'dynamo'),
+            'panel' => 'dynamo_borders_shadows',
+        ]);
+
+        foreach (dynamo_border_radius_presets() as $slug => $data) {
+            $token = 'borders-radius-' . $slug;
+            if (Dynamo_Token_Registry::is_alias($token)) {
+                continue;
+            }
+            $setting_id = 'dynamo_' . str_replace('-', '_', $token);
+            $wp_customize->add_setting($setting_id, [
+                'default'           => $this->registry->get($token) ?? $data['default'],
+                'sanitize_callback' => 'sanitize_text_field',
+                'transport'         => 'postMessage',
+            ]);
+            $wp_customize->add_control(new WP_Customize_Control($wp_customize, $setting_id, [
+                'label'   => $data['label'],
+                'section' => 'dynamo_radius_scale',
+                'type'    => 'text',
+            ]));
+        }
+    }
+
     private function register_borders_and_shadows(object $wp_customize): void {
         $wp_customize->add_panel('dynamo_borders_shadows', [
             'title'    => __('Dynamo: Borders & Shadows', 'dynamo'),
@@ -314,6 +339,8 @@ class Dynamo_Customizer {
             'sm' => __('Header & Menu', 'dynamo'),
             'md' => __('Product Card', 'dynamo'),
         ];
+
+        $this->register_radius_scale($wp_customize);
 
         foreach ($shadow_groups as $size => $group_label) {
             $color_setting = "dynamo_shadows_{$size}_color";

@@ -3,7 +3,12 @@ declare(strict_types=1);
 
 function dynamo_border_radius_presets(): array {
     return apply_filters('dynamo_border_radius_presets', [
-        'lg' => ['label' => 'Large', 'default' => '0.5rem'],
+        'none'    => ['label' => 'None',    'default' => '0'],
+        'sm'      => ['label' => 'Small',   'default' => '0.25rem'],
+        'default' => ['label' => 'Default', 'default' => '0.375rem'],
+        'lg'      => ['label' => 'Large',   'default' => '0.5rem'],
+        'xl'      => ['label' => 'X-Large', 'default' => '0.75rem'],
+        'pill'    => ['label' => 'Pill',    'default' => '9999px'],
     ]);
 }
 

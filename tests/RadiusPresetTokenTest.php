@@ -207,14 +207,17 @@ class RadiusPresetTokenTest extends TestCase
     }
 
     /** @test */
-    public function dynamo_border_radius_presets_out_of_the_box_has_only_lg(): void
+    public function dynamo_border_radius_presets_out_of_the_box_has_six_entries(): void
     {
+        // Issue #37 expanded the out-of-the-box set from the single `lg` tracer
+        // step (issue #36) to the full canonical six-step set:
+        // none, sm, default, lg, xl, pill.
         $presets = dynamo_border_radius_presets();
 
         $this->assertCount(
-            1,
+            6,
             $presets,
-            'Out-of-the-box dynamo_border_radius_presets() must return exactly one preset (lg).'
+            'Out-of-the-box dynamo_border_radius_presets() must return exactly six presets (none, sm, default, lg, xl, pill).'
         );
     }
 

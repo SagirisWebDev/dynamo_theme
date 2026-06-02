@@ -7,7 +7,12 @@ const WIDTH_PRESET_OPTIONS = [
 ];
 
 const RADIUS_PRESET_OPTIONS = [
-    { value: 'lg', label: 'Large' },
+    { value: 'none',    label: 'None' },
+    { value: 'sm',      label: 'Small' },
+    { value: 'default', label: 'Default' },
+    { value: 'lg',      label: 'Large' },
+    { value: 'xl',      label: 'X-Large' },
+    { value: 'pill',    label: 'Pill' },
 ];
 
 const { addFilter } = wp.hooks;
