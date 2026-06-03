@@ -22,6 +22,11 @@ class Dynamo_Customizer {
         add_action('customize_save_after', fn() => dynamo_bust_css_cache());
     }
 
+    public function sanitize_layout_mode(string $value): string {
+        $valid = ['full-width', 'sidebar-left', 'sidebar-right'];
+        return in_array($value, $valid, true) ? $value : 'full-width';
+    }
+
     public function register(object $wp_customize): void {
         $wp_customize->add_panel('dynamo_colours', [
             'title'    => __('Dynamo: Colours', 'dynamo'),
@@ -207,6 +212,22 @@ class Dynamo_Customizer {
         $wp_customize->add_section('dynamo_layout_section', [
             'title' => __('Layout', 'dynamo'),
             'panel' => 'dynamo_layout',
+        ]);
+
+        $wp_customize->add_setting('dynamo_layout_mode', [
+            'default'           => 'full-width',
+            'sanitize_callback' => [$this, 'sanitize_layout_mode'],
+            'transport'         => 'refresh',
+        ]);
+        $wp_customize->add_control('dynamo_layout_mode', [
+            'label'   => __('Sidebar Layout', 'dynamo'),
+            'section' => 'dynamo_layout_section',
+            'type'    => 'radio',
+            'choices' => [
+                'full-width'    => __('None', 'dynamo'),
+                'sidebar-left'  => __('Sidebar Left', 'dynamo'),
+                'sidebar-right' => __('Sidebar Right', 'dynamo'),
+            ],
         ]);
 
         $controls = [

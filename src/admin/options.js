@@ -72,20 +72,22 @@ function DynamoOptions() {
                             />
                         ) }
                         { tab.name === 'features' && Object.entries( FEATURE_LABELS ).map( ( [ key, label ] ) => (
-                            <ToggleControl
-                                key={ key }
-                                label={ label }
-                                checked={ options.features[ key ] }
-                                onChange={ ( val ) => setOptions( setFeature( options, key, val ) ) }
-                            />
+                            <div key={ key } style={ { marginBottom: '1rem' } }>
+                                <ToggleControl
+                                    label={ label }
+                                    checked={ options.features[ key ] }
+                                    onChange={ ( val ) => setOptions( setFeature( options, key, val ) ) }
+                                />
+                            </div>
                         ) ) }
                         { tab.name === 'performance' && Object.entries( PERFORMANCE_LABELS ).map( ( [ key, label ] ) => (
-                            <ToggleControl
-                                key={ key }
-                                label={ label }
-                                checked={ options.performance[ key ] }
-                                onChange={ ( val ) => setOptions( setPerformance( options, key, val ) ) }
-                            />
+                            <div key={ key } style={ { marginBottom: '1rem' } }>
+                                <ToggleControl
+                                    label={ label }
+                                    checked={ options.performance[ key ] }
+                                    onChange={ ( val ) => setOptions( setPerformance( options, key, val ) ) }
+                                />
+                            </div>
                         ) ) }
                     </div>
                 ) }

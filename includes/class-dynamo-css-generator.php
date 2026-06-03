@@ -120,6 +120,7 @@ class Dynamo_CSS_Generator {
                 $lines[] = "  --dynamo-{$key}: {$value};";
             }
         }
+
         return implode("\n", $lines);
     }
 

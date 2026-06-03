@@ -42,6 +42,7 @@ class Dynamo_WooCommerce {
         add_action('template_redirect', [$this, 'apply_single_product_visibility']);
         add_action('template_redirect', [$this, 'apply_cart_visibility']);
         add_action('template_redirect', [$this, 'apply_product_card_visibility']);
+        add_action('template_redirect', [$this, 'apply_breadcrumb_visibility']);
         add_action('woocommerce_before_quantity_input_field', [$this, 'render_quantity_minus_button']);
         add_action('woocommerce_after_quantity_input_field', [$this, 'render_quantity_plus_button']);
         add_filter('gettext', [$this, 'filter_cart_button_text'], 10, 3);
@@ -173,6 +174,12 @@ class Dynamo_WooCommerce {
     public function apply_cart_visibility(): void {
         if (!$this->is_cross_sells_enabled()) {
             remove_action('woocommerce_cart_collaterals', 'woocommerce_cross_sell_display');
+        }
+    }
+
+    public function apply_breadcrumb_visibility(): void {
+        if (!Dynamo_Options::is_feature_enabled('breadcrumbs')) {
+            remove_action('woocommerce_before_main_content', 'woocommerce_breadcrumb', 20);
         }
     }
 

@@ -99,6 +99,10 @@ class Dynamo_Options {
     }
 
     public static function get_layout_mode(): string {
+        $mod = get_theme_mod('dynamo_layout_mode');
+        if (false !== $mod && '' !== $mod && in_array($mod, self::VALID_LAYOUT_MODES, true)) {
+            return $mod;
+        }
         $options = get_option('dynamo_options', []);
         $mode    = $options['layout_mode'] ?? 'full-width';
         return in_array($mode, self::VALID_LAYOUT_MODES, true) ? $mode : 'full-width';

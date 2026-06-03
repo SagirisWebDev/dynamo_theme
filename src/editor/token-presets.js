@@ -1,13 +1,11 @@
 const WIDTH_PRESET_OPTIONS = [
     { value: 'narrow',    label: 'Narrow' },
-    { value: 'default',   label: 'Default' },
     { value: 'wide',      label: 'Wide' },
     { value: 'container', label: 'Container' },
     { value: 'full',      label: 'Full' },
 ];
 
 const RADIUS_PRESET_OPTIONS = [
-    { value: 'none',    label: 'None' },
     { value: 'sm',      label: 'Small' },
     { value: 'default', label: 'Default' },
     { value: 'lg',      label: 'Large' },
@@ -153,7 +151,7 @@ if (wp.compose && wp.blockEditor && wp.components && wp.element && wp.blocks) {
                     controls.push(
                         wp.element.createElement(wp.components.SelectControl, {
                             key: 'dynamo-width',
-                            label: 'Width',
+                            label: 'Max Width',
                             value: dynamoWidth,
                             options: widthOptions,
                             disabled: nativeWidthSet,
